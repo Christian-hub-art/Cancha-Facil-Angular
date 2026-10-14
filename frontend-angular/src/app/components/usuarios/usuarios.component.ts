@@ -1,19 +1,13 @@
 import { CommonModule, DatePipe } from '@angular/common'; // Importa utilidades comunes y el pipe para fechas.
-import { Component } from '@angular/core'; // Permite definir el componente Angular.
+import { Component, inject } from '@angular/core'; // Permite definir el componente Angular y obtener servicios con inject().
 import { FormsModule } from '@angular/forms'; // Habilita el enlace de datos de los formularios.
-
-interface Usuario { // Define la estructura de cada usuario.
-  id: number; // Identificador único del usuario.
-  nombre: string; // Nombre completo del usuario.
-  email: string; // Correo electrónico del usuario.
-  telefono: string; // Número telefónico del usuario.
-  rol: 'ADMINISTRADOR' | 'CLIENTE'; // Limita el rol a estas dos opciones.
-  fechaRegistro: string; // Guarda la fecha de registro como texto.
-}
+import { Usuario } from '../../models/usuario.model'; // Estructura de cada usuario (antes estaba definida aquí).
+import { UsuarioService } from '../../services/usuario.service'; // Servicio con la lógica de usuarios.
+import { UsuarioForm } from '../usuario-form/usuario-form.component'; // Componente hijo: formulario de usuario.
 
 @Component({// decorador: patron de diseño de software que permite agregar funcionalidades a una clase 
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePipe],
+  imports: [CommonModule, FormsModule, DatePipe, UsuarioForm],
   selector: 'app-usuarios',
   styleUrl: './usuarios.component.css',
   templateUrl: './usuarios.component.html',
@@ -21,40 +15,14 @@ interface Usuario { // Define la estructura de cada usuario.
 export class Usuarios {
   filtro = '';
 
-  usuarios: Usuario[] = [
-    {
-      id: 1,
-      nombre: 'Christian Medina',
-      email: 'christian@javeriana.edu.co',
-      telefono: '3132178001',
-      rol: 'CLIENTE',
-      fechaRegistro: '2026-09-07',
-    },
-    {
-      id: 2,
-      nombre: 'Laura Gómez',
-      email: 'laura@correo.com',
-      telefono: '3001234567',
-      rol: 'CLIENTE',
-      fechaRegistro: '2026-09-15',
-    },
-    {
-      id: 3,
-      nombre: 'Mateo Ruiz',
-      email: 'mateo@canchafacil.com',
-      telefono: '3207654321',
-      rol: 'ADMINISTRADOR',
-      fechaRegistro: '2026-08-20',
-    },
-    {
-      id: 4,
-      nombre: 'Valentina López',
-      email: 'valentina@correo.com',
-      telefono: '3119876543',
-      rol: 'CLIENTE',
-      fechaRegistro: '2026-09-24',
-    },
-  ];
+  // Angular entrega la instancia de UsuarioService (no se usa new UsuarioService()).
+  usuarioService = inject(UsuarioService);
+
+  // Los datos de ejemplo ahora viven en UsuarioService.
+  usuarios: Usuario[] = this.usuarioService.obtenerUsuarios();
+
+  // Controla si se muestra el formulario de nuevo usuario.
+  mostrarFormulario = false;
 
   get usuariosFiltrados(): Usuario[] {
     const texto = this.filtro.trim().toLowerCase();
@@ -72,5 +40,11 @@ export class Usuarios {
 
   limpiarFiltro(): void {
     this.filtro = '';
+  }
+
+  // $event trae el usuario que el formulario hijo envió con emit().
+  guardarUsuario(usuario: Usuario): void {
+    this.usuarioService.agregarUsuario(usuario);
+    this.mostrarFormulario = false;
   }
 }

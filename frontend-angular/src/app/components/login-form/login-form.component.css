@@ -1,0 +1,45 @@
+/* Colores tomados de usuarios.component.css para mantener el mismo estilo. */
+.auth-tarjeta {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 1.5rem;
+}
+
+.auth-tarjeta h2 {
+  margin: 0 0 1rem;
+  color: #0f172a;
+}
+
+.campo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.campo-form label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.control {
+  border: 1px solid #dfe5ec;
+  border-radius: 10px;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.92rem;
+}
+
+.btn {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.7rem 1.1rem;
+}
+
+.btn-primario {
+  width: 100%;
+  background: #1b5e20;
+  color: #fff;
+}

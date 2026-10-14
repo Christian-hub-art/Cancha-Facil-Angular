@@ -4,10 +4,14 @@
       <h1>Usuarios</h1>
       <p>Usuarios y administradores registrados en la plataforma.</p>
     </div>
-    <button class="btn btn-primary" type="button">Nuevo usuario</button>
+    <button class="btn btn-primary" type="button" (click)="mostrarFormulario = !mostrarFormulario">Nuevo usuario</button>
   </div>
 
   <div class="card">
+    @if (mostrarFormulario) {
+      <app-usuario-form (usuarioGuardado)="guardarUsuario($event)"></app-usuario-form>
+    }
+
     <div class="toolbar">
       <div class="search-box">
         <span class="icon">⌕</span>
