@@ -81,15 +81,16 @@ export class Usuarios {
     });
 
     from(datos).subscribe(usuario => {
-      console.log('FROM:', usuario.nombre);
+      console.log('FROM: id: ',usuario.id, 'nombre: ',usuario.nombre);
 
     });
-    range(0, Math.min(3, datos.length)).subscribe(indice => {
+    range(0, Math.min(5, datos.length)).subscribe(indice => {
         console.log('RANGE:', indice, datos[indice].nombre);
       })
 
     const aviso$ = new Observable<string>(observador =>{
       observador.next(`Se recibieron ${datos.length} usuarios`);
+      observador.next('Se procesaron todos los usuarios de manera correcta');
       observador.complete();
     });
     aviso$.subscribe(mensaje => {
