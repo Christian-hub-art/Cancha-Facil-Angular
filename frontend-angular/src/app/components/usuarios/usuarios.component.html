@@ -1,10 +1,20 @@
 <section class="usuarios-page">
   <div class="page-header">
     <div>
+      <h2>Usuarios registrados</h2>
+      <button (click)="cargarUsuarios()">Recargar usuarios</button>
+      @if (mensajeError()) {
+        <p>{{ mensajeError() }}</p>
+      }
+      @for (usuario of usuarios(); track usuario.id) {
+        <p>{{ usuario.id }} - {{ usuario.nombre }}</p>
+      }
       <h1>Usuarios</h1>
       <p>Usuarios y administradores registrados en la plataforma.</p>
     </div>
-    <button class="btn btn-primary" type="button" (click)="mostrarFormulario = !mostrarFormulario">Nuevo usuario</button>
+    <button class="btn btn-primary" type="button" (click)="mostrarFormulario = !mostrarFormulario">
+      Nuevo usuario
+    </button>
   </div>
 
   <div class="card">
@@ -70,8 +80,12 @@
                 <td>
                   <div class="actions">
                     <button class="btn btn-light" type="button">Ver</button>
-                    <button class="btn btn-light" type="button" aria-label="Editar usuario">✎</button>
-                    <button class="btn btn-danger" type="button" aria-label="Eliminar usuario">🗑</button>
+                    <button class="btn btn-light" type="button" aria-label="Editar usuario">
+                      ✎
+                    </button>
+                    <button class="btn btn-danger" type="button" aria-label="Eliminar usuario">
+                      🗑
+                    </button>
                   </div>
                 </td>
               </tr>

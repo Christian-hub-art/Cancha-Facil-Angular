@@ -17,7 +17,9 @@ export class UsuarioForm {
   nombre: string = '';
   email: string = '';
   telefono: string = '';
+  direccion: string = '';
   rol: 'ADMINISTRADOR' | 'CLIENTE' = 'CLIENTE';
+  fechaRegistro: string = '';
 
   guardar(): void {
     const usuario: Usuario = {
@@ -25,7 +27,8 @@ export class UsuarioForm {
       email: this.email,
       telefono: this.telefono,
       rol: this.rol,
-      fechaRegistro: new Date().toISOString().slice(0, 10), // Fecha de hoy (aaaa-mm-dd).
+      direccion: this.direccion,
+      fechaRegistro: this.fechaRegistro,
     };
 
     // emit(...) envía el usuario al componente padre.

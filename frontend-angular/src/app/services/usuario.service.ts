@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { Usuario } from '../models/usuario.model';
-
 // Servicio con la lógica de los usuarios. Mientras Angular no se conecte al
 // backend (/api/usuarios), guarda los usuarios temporalmente en un arreglo.
 @Injectable({
@@ -15,7 +16,8 @@ export class UsuarioService {
       email: 'christian@javeriana.edu.co',
       telefono: '3132178001',
       rol: 'CLIENTE',
-      fechaRegistro: '2026-09-07',
+      direccion: 'Calle 123 #45-67, Bogotá, Colombia',
+      fechaRegistro: '2026-08-07',
     },
     {
       id: 2,
@@ -23,7 +25,8 @@ export class UsuarioService {
       email: 'laura@correo.com',
       telefono: '3001234567',
       rol: 'CLIENTE',
-      fechaRegistro: '2026-09-15',
+      direccion: 'Calle 123 #45-67, Bogotá, Colombia',
+      fechaRegistro: '2026-08-07',
     },
     {
       id: 3,
@@ -31,7 +34,8 @@ export class UsuarioService {
       email: 'mateo@canchafacil.com',
       telefono: '3207654321',
       rol: 'ADMINISTRADOR',
-      fechaRegistro: '2026-08-20',
+      direccion: 'Calle 123 #45-67, Bogotá, Colombia',
+      fechaRegistro: '2026-08-07',
     },
     {
       id: 4,
@@ -39,7 +43,8 @@ export class UsuarioService {
       email: 'valentina@correo.com',
       telefono: '3119876543',
       rol: 'CLIENTE',
-      fechaRegistro: '2026-09-24',
+      direccion: 'Calle 123 #45-67, Bogotá, Colombia',
+      fechaRegistro: '2026-08-07',
     },
   ];
 
@@ -49,7 +54,10 @@ export class UsuarioService {
     this.usuarios.push({ ...usuario, id: siguienteId });
   }
 
-  obtenerUsuarios(): Usuario[] {
-    return this.usuarios;
+  private readonly http = inject(HttpClient);
+  private readonly url = 'http://localhost:8080/api/usuarios';
+
+  obtenerUsuarios(): Observable<Usuario[]> {
+    return this.http.get<Usuario[]>(this.url);
   }
 }
