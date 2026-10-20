@@ -1,7 +1,7 @@
 import { CommonModule, DatePipe } from '@angular/common'; // Importa utilidades comunes y el pipe para fechas.
 import { Component, inject, signal } from '@angular/core'; // Permite definir el componente Angular y obtener servicios con inject().
 import { FormsModule } from '@angular/forms'; // Habilita el enlace de datos de los formularios.
-import { catchError, of, Subscription, range, Observable, from } from 'rxjs';
+import { catchError, of, Subscription, range, Observable, from, Subject, switchMap } from 'rxjs';
 import { Usuario } from '../../models/usuario.model'; // Estructura de cada usuario (antes estaba definida aquí).
 import { UsuarioService } from '../../services/usuario.service'; // Servicio con la lógica de usuarios.
 import { UsuarioForm } from '../usuario-form/usuario-form.component'; // Componente hijo: formulario de usuario.
@@ -69,9 +69,7 @@ export class Usuarios {
     this.mostrarFormulario = false;
   }
 
-  ngOnInit() {
-    this.cargarUsuarios();
-  }
+  
 
 //segundo punto del taller
   examinarUsuario(){
@@ -96,5 +94,35 @@ export class Usuarios {
     aviso$.subscribe(mensaje => {
       console.log('MANUAL:', mensaje);
     })
+  }
+
+  //punto 3 taller
+  private readonly seleccionId$ = new Subject<number>();
+  usuarioActual = signal<Usuario | null>(null);
+
+  seleccionarUsuario(id: number){
+    this.usuarioActual.set(null);
+    this.seleccionId$.next(id);
+  }
+
+
+  ngOnInit() {
+    this.cargarUsuarios();
+
+    //punto 3 taller
+    this.suscripciones.add(
+      this.seleccionId$
+      .pipe(
+        switchMap(id => 
+          this.usuarioService.consultarPorId(id).pipe(
+            catchError((error)=>{
+              console.error(error);
+              return of(null);
+            })
+          )
+        )
+      )
+      .subscribe(usuario => this.usuarioActual.set(usuario))
+    )
   }
 }

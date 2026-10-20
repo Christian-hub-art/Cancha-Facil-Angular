@@ -9,6 +9,17 @@
       @for (usuario of usuarios(); track usuario.id) {
         <p>{{ usuario.id }} - {{ usuario.nombre }}</p>
       }
+
+      <h2>Punto 3 taller</h2>
+      @for (usuario of usuarios(); track usuario.id){
+        <button (click)="seleccionarUsuario(usuario.id!)">Ver {{usuario.id}}</button>
+      }
+      @if (usuarioActual(); as usuario){
+        <h3>Usuario seleccionado</h3>
+        <p>ID: {{usuario.id}}</p>
+        <p>Nombre: {{usuario.nombre}}</p>
+      }
+
       <h1>Usuarios</h1>
       <p>Usuarios y administradores registrados en la plataforma.</p>
     </div>

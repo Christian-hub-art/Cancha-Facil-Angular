@@ -60,4 +60,9 @@ export class UsuarioService {
   obtenerUsuarios(): Observable<Usuario[]> {
     return this.http.get<Usuario[]>(this.url);
   }
+
+  //punto 3 del taller
+  consultarPorId(id: number): Observable<Usuario>{
+    return this.http.get<Usuario>(`${this.url}/${id}`);
+  }  
 }
