@@ -1,7 +1,7 @@
 import { CommonModule, DatePipe } from '@angular/common'; // Importa utilidades comunes y el pipe para fechas.
 import { Component, inject, signal } from '@angular/core'; // Permite definir el componente Angular y obtener servicios con inject().
 import { FormsModule } from '@angular/forms'; // Habilita el enlace de datos de los formularios.
-import { catchError, of, Subscription } from 'rxjs';
+import { catchError, of, Subscription, range, Observable, from } from 'rxjs';
 import { Usuario } from '../../models/usuario.model'; // Estructura de cada usuario (antes estaba definida aquí).
 import { UsuarioService } from '../../services/usuario.service'; // Servicio con la lógica de usuarios.
 import { UsuarioForm } from '../usuario-form/usuario-form.component'; // Componente hijo: formulario de usuario.
@@ -71,5 +71,29 @@ export class Usuarios {
 
   ngOnInit() {
     this.cargarUsuarios();
+  }
+
+//segundo punto del taller
+  examinarUsuario(){
+    const datos = this.usuarios();
+    of(datos).subscribe(lista => {
+      console.log('OF: total', lista.length)
+    });
+
+    from(datos).subscribe(usuario => {
+      console.log('FROM:', usuario.nombre);
+
+    });
+    range(0, Math.min(3, datos.length)).subscribe(indice => {
+        console.log('RANGE:', indice, datos[indice].nombre);
+      })
+
+    const aviso$ = new Observable<string>(observador =>{
+      observador.next(`Se recibieron ${datos.length} usuarios`);
+      observador.complete();
+    });
+    aviso$.subscribe(mensaje => {
+      console.log('MANUAL:', mensaje);
+    })
   }
 }
