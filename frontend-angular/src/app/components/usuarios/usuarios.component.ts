@@ -1,7 +1,10 @@
 import { CommonModule, DatePipe } from '@angular/common'; // Importa utilidades comunes y el pipe para fechas.
 import { Component, inject, signal } from '@angular/core'; // Permite definir el componente Angular y obtener servicios con inject().
 import { FormsModule } from '@angular/forms'; // Habilita el enlace de datos de los formularios.
-import { catchError, of, Subscription, range, Observable, from, Subject, switchMap } from 'rxjs';
+import { 
+  catchError, of, Subscription, range, 
+  Observable, from, Subject, switchMap, 
+  defer, tap, concatMap, mergeMap} from 'rxjs';
 import { Usuario } from '../../models/usuario.model'; // Estructura de cada usuario (antes estaba definida aquí).
 import { UsuarioService } from '../../services/usuario.service'; // Servicio con la lógica de usuarios.
 import { UsuarioForm } from '../usuario-form/usuario-form.component'; // Componente hijo: formulario de usuario.
@@ -105,6 +108,50 @@ export class Usuarios {
     this.seleccionId$.next(id);
   }
 
+  //punto 4 taller 
+  resultadosRevision = signal<Usuario[]>([]);
+  private revisionActual?: Subscription;
+  private consultarConRegistro(id: number){
+    return defer(() =>{
+      console.log('Inicia consulta: ', id);
+      
+      return this.usuarioService.consultarPorId(id).pipe(
+        tap(()=> console.log('Termina consulta: ', id)),
+        catchError(error => {
+          console.error('Error:' , id , error);
+          return of(null);
+        })
+      )
+    })
+  }
+//consulta secuencial
+  revisarEnOrden(){
+    const ids = this.usuarios().slice(0,3).map(u => u.id!);
+    this.revisionActual?.unsubscribe();
+    this.resultadosRevision.set([]);
+    this.revisionActual = from(ids).pipe(
+      concatMap(id => this.consultarConRegistro(id))
+    ).subscribe(usuario => {
+      if(usuario !== null){
+        this.resultadosRevision.update(actual => [...actual, usuario]);
+      }
+    })
+  }
+  //consulta recurrente
+  revisarSimultaneamente() {
+    const ids = this.usuarios().slice(0, 3).map(u => u.id!);
+
+    this.revisionActual?.unsubscribe();
+    this.resultadosRevision.set([]);
+
+    this.revisionActual = from(ids).pipe(
+      mergeMap(id => this.consultarConRegistro(id))
+    ).subscribe(usuario => {
+      if (usuario !== null) {
+        this.resultadosRevision.update(actual => [...actual, usuario]);
+      }
+    });
+  }
 
   ngOnInit() {
     this.cargarUsuarios();
