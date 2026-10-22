@@ -31,6 +31,70 @@
         <p>{{ usuario.nombre }}</p>
       }
 
+
+
+    <h2>Punto 5 y 6- Subject, exhaustMap y async pipe</h2>
+
+    <button (click)="solicitarActualizacion()">
+      Actualizar listado
+    </button>
+
+    @if (mensajeError()) {
+      <p>{{ mensajeError() }}</p>
+    }
+
+    @for (usuario of (listado$ | async) ?? []; track usuario.id) {
+      <p>{{ usuario.nombre }}</p>
+
+      <button (click)="seleccionarUsuario(usuario.id!)">
+        Seleccionar
+      </button>
+    }
+
+
+    <h2>Punto 7 - BehaviorSubject</h2>
+
+    @if (usuarioSeleccionado$ | async; as usuario) {
+      <p>Selección compartida: {{ usuario.nombre }}</p>
+    }
+
+
+    <h2>Punto 8 - combineLatest</h2>
+
+    <label>Filtrar usuarios</label>
+
+    <input
+      [formControl]="filtroRxJS"
+      placeholder="Parte del nombre"
+    />
+
+    @for (usuario of (usuariosFiltrados$ | async) ?? []; track usuario.id) {
+      <p>{{ usuario.nombre }}</p>
+
+      <button (click)="seleccionarUsuario(usuario.id!)">
+        Seleccionar
+      </button>
+    }
+
+
+
+
+    <h2>Punto 9 - forkJoin</h2>
+
+    <button (click)="compararUsuarios()">
+      Consultar dos usuarios
+    </button>
+
+    @if (comparacion(); as datos) {
+      <h3>Comparación</h3>
+
+      <p>Primero: {{ datos.primero?.nombre }}</p>
+      <p>Segundo: {{ datos.segundo?.nombre }}</p>
+    }
+
+
+
+
       <h1>Usuarios</h1>
       <p>Usuarios y administradores registrados en la plataforma.</p>
     </div>

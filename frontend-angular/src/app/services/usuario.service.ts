@@ -2,6 +2,9 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Usuario } from '../models/usuario.model';
+
+import { BehaviorSubject } from 'rxjs';
+
 // Servicio con la lógica de los usuarios. Mientras Angular no se conecte al
 // backend (/api/usuarios), guarda los usuarios temporalmente en un arreglo.
 @Injectable({
@@ -65,4 +68,21 @@ export class UsuarioService {
   consultarPorId(id: number): Observable<Usuario>{
     return this.http.get<Usuario>(`${this.url}/${id}`);
   }  
+
+
+  //punto 7
+
+
+// PUNTO 7 - BehaviorSubject
+
+  private readonly usuarioSeleccionadoFuente =
+    new BehaviorSubject<Usuario | null>(null);
+
+  readonly usuarioSeleccionado$ =
+    this.usuarioSeleccionadoFuente.asObservable();
+
+  seleccionarUsuario(usuario: Usuario | null) {
+    this.usuarioSeleccionadoFuente.next(usuario);
+  }
+
 }
