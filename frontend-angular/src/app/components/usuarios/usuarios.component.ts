@@ -284,40 +284,34 @@ export class Usuarios implements OnInit, OnDestroy {
 
 
 
-  // PUNTO 9 - FORKJOIN
+// PUNTO 9 - FORKJOIN
 
-  comparacion = signal<{
-    primero: Usuario | null;
-    segundo: Usuario | null;
-  } | null>(null);
+    comparacion = signal<{
+      primero: Usuario | null;
+      segundo: Usuario | null;
+    } | null>(null);
 
-  compararUsuarios(): void {
-    this.comparacion.set(null);
-    this.mensajeError.set('');
+    compararUsuarios() {
+      const seleccionados = this.usuarios().slice(0, 2);
 
-    const ids = this.usuarios()
-      .map(usuario => usuario.id)
-      .filter((id): id is number => id !== undefined)
-      .slice(0, 2);
+      if (seleccionados.length < 2) return;
 
-    if (ids.length < 2) {
-      this.mensajeError.set('Se necesitan al menos dos usuarios para comparar');
-      return;
+      this.suscripciones.add(
+        forkJoin({
+          primero: this.usuarioService.consultarPorId(seleccionados[0].id!),
+          segundo: this.usuarioService.consultarPorId(seleccionados[1].id!)
+        }).pipe(
+          catchError(error => {
+            console.error(error);
+            return of(null);
+          })
+        ).subscribe(resultado => this.comparacion.set(resultado))
+      );
     }
 
-    this.suscripciones.add(
-      forkJoin({
-        primero: this.usuarioService.consultarPorId(ids[0]),
-        segundo: this.usuarioService.consultarPorId(ids[1])
-      }).pipe(
-        catchError(error => {
-          console.error(error);
-          this.mensajeError.set('No fue posible consultar los usuarios para comparar');
-          return of(null);
-        })
-      ).subscribe(datos => this.comparacion.set(datos))
-    );
-  }
+
+
+
 
   // INICIALIZACIÓN DEL COMPONENTE
 
