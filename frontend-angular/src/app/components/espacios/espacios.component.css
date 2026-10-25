@@ -1,0 +1,78 @@
+/* El diseño general viene de estilos.css (el mismo de Thymeleaf).
+   Aquí solo va lo que no existe en ese archivo. */
+:host {
+  display: block;
+}
+
+/* Botón para cerrar el mensaje de éxito/error */
+.alerta {
+  align-items: center;
+}
+
+.texto-alerta {
+  flex: 1;
+}
+
+.cerrar {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* Indicador de carga */
+.alerta-info {
+  align-items: center;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #cddbff;
+  border-top-color: #1e3a8a;
+  border-radius: 50%;
+  animation: girar 0.8s linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Mientras carga, las tarjetas se ven más claras */
+.atenuada {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Los botones desactivados se ven apagados */
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Barra de paginación debajo de las tarjetas */
+.paginacion {
+  margin-top: 1.5rem;
+}
+
+.paginacion .herramientas {
+  border-bottom: none;
+}
+
+.info-pagina {
+  color: var(--suave);
+  font-size: 0.9rem;
+}
+
+.info-pagina strong {
+  color: var(--tinta);
+}
+
+.botones-pagina {
+  display: flex;
+  gap: 0.5rem;
+}
