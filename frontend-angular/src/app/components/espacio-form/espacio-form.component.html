@@ -1,0 +1,135 @@
+<!-- Mismo diseño que templates/espacios/formulario.html (clases de estilos.css) -->
+<div class="tarjeta formulario">
+  <form class="tarjeta-cuerpo" [formGroup]="formulario" (ngSubmit)="enviar()" novalidate>
+    <div class="tarjeta-titulo">
+      <span>{{ espacio() ? 'Editar cancha: ' + espacio()!.nombre : 'Nueva cancha' }}</span>
+    </div>
+
+    <div class="form-grid">
+      <!-- Nombre: obligatorio, entre 3 y 150 caracteres -->
+      <div class="campo-form">
+        <label for="nombre">Nombre de la cancha</label>
+        <input
+          id="nombre"
+          class="control"
+          type="text"
+          formControlName="nombre"
+          placeholder="Ej: Colegio San Bartolomé - Micro"
+          [class.campo-invalido]="invalido('nombre')"
+        />
+        @if (invalido('nombre')) {
+          @if (formulario.controls.nombre.hasError('required')) {
+            <span class="error-campo">El nombre es obligatorio.</span>
+          }
+          @if (formulario.controls.nombre.hasError('minlength')) {
+            <span class="error-campo">El nombre debe tener al menos 3 caracteres.</span>
+          }
+          @if (formulario.controls.nombre.hasError('maxlength')) {
+            <span class="error-campo">El nombre no puede superar 150 caracteres.</span>
+          }
+        }
+      </div>
+
+      <!-- Tipo de cancha (microfútbol, fútbol 5...): obligatorio -->
+      <div class="campo-form">
+        <label for="tipoDeporte">Tipo de cancha</label>
+        <select
+          id="tipoDeporte"
+          class="control"
+          formControlName="tipoDeporte"
+          [class.campo-invalido]="invalido('tipoDeporte')"
+        >
+          <option value="" disabled>-- Seleccione --</option>
+          @for (tipo of tiposCancha; track tipo) {
+            <option [value]="tipo">{{ tipo }}</option>
+          }
+        </select>
+        @if (invalido('tipoDeporte')) {
+          <span class="error-campo">Debes escoger el tipo de cancha.</span>
+        }
+      </div>
+
+      <!-- Precio por hora: obligatorio y mínimo $1.000 -->
+      <div class="campo-form">
+        <label for="precioHora">Precio por hora (COP)</label>
+        <input
+          id="precioHora"
+          class="control"
+          type="number"
+          step="1000"
+          formControlName="precioHora"
+          placeholder="80000"
+          [class.campo-invalido]="invalido('precioHora')"
+        />
+        @if (invalido('precioHora')) {
+          @if (formulario.controls.precioHora.hasError('required')) {
+            <span class="error-campo">El precio es obligatorio.</span>
+          }
+          @if (formulario.controls.precioHora.hasError('min')) {
+            <span class="error-campo">El precio mínimo es $1.000.</span>
+          }
+        }
+      </div>
+
+      <!-- Capacidad: obligatoria, entre 1 y 100 jugadores -->
+      <div class="campo-form">
+        <label for="capacidad">Capacidad (jugadores)</label>
+        <input
+          id="capacidad"
+          class="control"
+          type="number"
+          formControlName="capacidad"
+          placeholder="10"
+          [class.campo-invalido]="invalido('capacidad')"
+        />
+        @if (invalido('capacidad')) {
+          @if (formulario.controls.capacidad.hasError('required')) {
+            <span class="error-campo">La capacidad es obligatoria.</span>
+          }
+          @if (formulario.controls.capacidad.hasError('min') || formulario.controls.capacidad.hasError('max')) {
+            <span class="error-campo">La capacidad debe estar entre 1 y 100 jugadores.</span>
+          }
+        }
+      </div>
+
+      <!-- Negocio al que pertenece: obligatorio -->
+      <div class="campo-form completo">
+        <label for="negocioId">ID del negocio</label>
+        <input
+          id="negocioId"
+          class="control"
+          type="number"
+          formControlName="negocioId"
+          [class.campo-invalido]="invalido('negocioId')"
+        />
+        @if (invalido('negocioId')) {
+          <span class="error-campo">Indica el negocio (número mayor a 0).</span>
+        }
+      </div>
+
+      <!-- Descripción: opcional, máximo 500 caracteres -->
+      <div class="campo-form completo">
+        <label for="descripcion">Descripción</label>
+        <textarea
+          id="descripcion"
+          class="control"
+          rows="3"
+          formControlName="descripcion"
+          placeholder="Cancha pública, grama sintética, con iluminación..."
+          [class.campo-invalido]="invalido('descripcion')"
+        ></textarea>
+        @if (invalido('descripcion')) {
+          <span class="error-campo">La descripción no puede superar 500 caracteres.</span>
+        }
+      </div>
+    </div>
+
+    <div class="form-acciones">
+      <button class="btn btn-neutro" type="button" (click)="cancelar()">Cancelar</button>
+      <button class="btn btn-primario" type="submit">
+        <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        {{ espacio() ? 'Guardar cambios' : 'Crear cancha' }}
+      </button>
+    </div>
+  </form>
+</div>

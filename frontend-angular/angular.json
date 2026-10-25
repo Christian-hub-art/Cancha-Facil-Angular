@@ -54,6 +54,7 @@
               }
             ],
             "styles": [
+              "../src/main/resources/static/css/estilos.css",
               "src/styles.css"
             ]
           },

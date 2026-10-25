@@ -1,9 +1,8 @@
 import { Component, signal } from '@angular/core';
-import { Usuarios } from './components/usuarios/usuarios.component';
-import { Login } from './components/login/login.component';
+import { Espacios } from './components/espacios/espacios.component';
 
 @Component({
-  imports: [Usuarios, Login],
+  imports: [Espacios],
   selector: 'app-root',
   styleUrl: './app.component.css',
   templateUrl: './app.component.html',
