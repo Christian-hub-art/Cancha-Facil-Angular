@@ -16,6 +16,8 @@ import org.springframework.security.web.SecurityFilterChain;
  * - /usuarios/** (CRUD de usuarios) solo lo ve el rol ADMINISTRADOR.
  * - /api/** queda abierto y sin CSRF para no romper el frontend Angular,
  *   que se ajustara mas adelante.
+ * - Swagger UI (/swagger-ui/**) y OpenAPI (/v3/api-docs/**) son publicos para
+ *   poder documentar y probar el API REST.
  * - Las contrasenas se guardan con BCrypt.
  *
  * El UserDetailsService (UsuarioDetallesService) y el PasswordEncoder de abajo
@@ -38,6 +40,10 @@ public class SeguridadConfig {
                 .requestMatchers("/", "/login", "/registro", "/error", "/error/**",
                         "/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
                 .requestMatchers("/api/**").permitAll()
+                // Swagger UI y la definicion OpenAPI (JSON/YAML) de springdoc.
+                // Sin esto, anyRequest().authenticated() redirige al login.
+                .requestMatchers("/swagger-ui.html", "/swagger-ui/**",
+                        "/v3/api-docs", "/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
                 .requestMatchers("/usuarios/**").hasRole("ADMINISTRADOR")
                 .anyRequest().authenticated())
             .formLogin(form -> form
