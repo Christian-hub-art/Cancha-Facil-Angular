@@ -1,0 +1,5 @@
+/* Estilos globales de Angular.
+   El diseño (colores, botones, tarjetas, formularios) viene de
+   src/main/resources/static/css/estilos.css, el mismo archivo que usan las
+   pantallas de Thymeleaf. Se carga desde angular.json ("styles"), así Angular
+   y Thymeleaf se ven iguales y solo hay un lugar para cambiar el diseño. */
