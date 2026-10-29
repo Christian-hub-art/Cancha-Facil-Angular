@@ -14,6 +14,11 @@
     </button>
   </div>
 
+  <!-- Manejo de errores HTTP: el mensaje se muestra arriba para que siempre se vea -->
+  @if (mensajeError()) {
+    <div class="alerta alerta-error" role="alert">{{ mensajeError() }}</div>
+  }
+
   <div class="card">
     @if (mostrarFormulario) {
       <app-usuario-form
@@ -161,11 +166,5 @@
       </div>
 
     </div>
-  </div>
-}
-
-@if (mensajeError()){
-  <div class="empty-state">
-  <p>{{mensajeError()}}</p>
   </div>
 }
