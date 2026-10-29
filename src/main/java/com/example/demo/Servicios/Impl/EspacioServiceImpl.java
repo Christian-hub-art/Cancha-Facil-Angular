@@ -3,6 +3,8 @@ package com.example.demo.Servicios.Impl;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,16 @@ public class EspacioServiceImpl implements EspacioService {
     @Override
     public List<Espacio> listar() {
         return espacioRepository.findAll();
+    }
+
+    /**
+     * Paginacion: JpaRepository ya trae findAll(Pageable). Con el Pageable
+     * (pagina, tamano y orden) Spring Data arma el LIMIT/OFFSET y ademas hace
+     * un count(*) para saber el total de registros y de paginas.
+     */
+    @Override
+    public Page<Espacio> listarPaginado(Pageable pageable) {
+        return espacioRepository.findAll(pageable);
     }
 
     @Override

@@ -1,5 +1,34 @@
-<!-- TEMPORAL: mientras no hay rutas solo se muestra Espacios.
-     La Persona 1 lo cambia por la barra/menú y <router-outlet> con /login, /usuarios y /espacios. -->
-<main class="app-main" style="margin: 0 auto">
-  <app-espacios></app-espacios>
+<!-- Barra de navegación (mismas clases de la barra pública de Thymeleaf, estilos.css) -->
+<header class="nav-publica">
+  <div class="interior">
+    <a class="marca" routerLink="/espacios">
+      <span class="isotipo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </span>
+      <span>CanchaFácil</span>
+    </a>
+
+    <!-- Routing: routerLink cambia de ruta sin recargar la página;
+         routerLinkActive pone la clase "activo" en el enlace de la ruta actual. -->
+    <nav class="enlaces">
+      <a routerLink="/espacios" routerLinkActive="activo">Canchas</a>
+      <a routerLink="/usuarios" routerLinkActive="activo">Usuarios</a>
+      <a routerLink="/login" routerLinkActive="activo">Ingresar</a>
+    </nav>
+
+    <!-- Signals: el contador se muestra con interpolación y se reinicia con event binding -->
+    <div class="acciones contador-visitas">
+      <span class="insignia insignia-verde" [title]="'Ruta actual: ' + rutaActual()">
+        Visitas: {{ visitas() }}
+      </span>
+      <button class="btn btn-neutro btn-sm" type="button" (click)="reiniciarVisitas()" [disabled]="visitas() === 0">
+        Reiniciar
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Aquí el router muestra el componente de la ruta actual -->
+<main class="app-main">
+  <router-outlet />
 </main>

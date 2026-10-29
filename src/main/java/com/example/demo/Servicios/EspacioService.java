@@ -3,11 +3,17 @@ package com.example.demo.Servicios;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.example.demo.Entidades.Espacio;
 
 public interface EspacioService {
 
     List<Espacio> listar();
+
+    /** Una pagina de espacios (la usa GET /api/espacios?page=0&size=5). */
+    Page<Espacio> listarPaginado(Pageable pageable);
 
     Espacio buscarPorId(Long id);
 

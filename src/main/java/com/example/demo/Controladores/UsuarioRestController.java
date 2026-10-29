@@ -2,10 +2,15 @@ package com.example.demo.Controladores;
 
 import com.example.demo.Entidades.Usuario;
 import com.example.demo.Entidades.Rol;
+import com.example.demo.DTO.ErrorRespuestaDTO;
 import com.example.demo.DTO.UsuarioDTO;
 import com.example.demo.Servicios.UsuarioService;
+
+import java.net.URI;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,11 +22,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Controlador REST de la entidad Usuario. Expone los servicios de la API para
- * consultar usuarios.
+ * Controlador REST de la entidad Usuario.
  *
  * Nunca devuelve la entidad Usuario directamente: siempre la convierte a
- * UsuarioDTO, asi el JSON no incluye el password ni las relaciones .
+ * UsuarioDTO, asi el JSON no incluye el password ni las relaciones.
+ *
+ * Cada endpoint devuelve ResponseEntity para poder elegir el codigo HTTP:
+ *   200 OK         -> consulta o actualizacion correcta
+ *   201 Created    -> usuario creado
+ *   204 No Content -> usuario eliminado
+ *   404 Not Found  -> el id no existe
+ *   409 Conflict   -> el correo ya esta registrado
+ *   400 Bad Request-> regla de negocio (ej: falta la contrasena), la responde ManejadorErroresApi
  */
 // Marca esta clase como controlador que devuelve datos, normalmente JSON.
 @RestController
@@ -35,59 +47,99 @@ public class UsuarioRestController {
 
     // Spring entrega el servicio al crear el controlador.
     public UsuarioRestController(UsuarioService usuarioService) {
-        // Guarda el servicio para usarlo en los endpoints.
         this.usuarioService = usuarioService;
     }
 
-    // Atiende GET /api/usuarios para consultar todos los usuarios.
+    // GET /api/usuarios -> 200 con todos los usuarios.
     @GetMapping
-    public List<UsuarioDTO> listar() {
-        // Obtiene los usuarios, convierte cada uno a DTO y arma la lista de respuesta.
-        return usuarioService.listar().stream()
+    public ResponseEntity<List<UsuarioDTO>> listar() {
+        List<UsuarioDTO> usuarios = usuarioService.listar().stream()
                 .map(UsuarioDTO::desde)
                 .toList();
+        return ResponseEntity.ok(usuarios);
     }
 
-    // Atiende GET /api/usuarios/{id}; toma el id desde la URL.
+    // GET /api/usuarios/{id} -> 200 con el usuario o 404 si no existe.
     @GetMapping("/{id}")
-    public UsuarioDTO buscarPorId(@PathVariable Long id) {
-        // Busca el usuario y convierte el resultado a DTO antes de responder.
-        return UsuarioDTO.desde(usuarioService.buscarPorId(id));
+    public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
+        Usuario usuario = usuarioService.buscarPorId(id);
+        if (usuario == null) {
+            return noEncontrado(id);
+        }
+        return ResponseEntity.ok(UsuarioDTO.desde(usuario));
     }
 
-    // Atiende POST /api/usuarios para crear un usuario.
+    // POST /api/usuarios -> 201 si se crea, 409 si el correo ya existe.
     @PostMapping
-    public UsuarioDTO crear(@RequestBody Usuario usuario) {
-        // Convierte el JSON recibido en Usuario; el servicio lo guarda y el DTO
-        // evita incluir la contrasena cifrada en la respuesta.
-        return UsuarioDTO.desde(usuarioService.guardar(usuario));
+    public ResponseEntity<?> crear(@RequestBody Usuario usuario) {
+        if (correoOcupado(usuario.getEmail(), null)) {
+            return correoRepetido(usuario.getEmail());
+        }
+        // Al crear, el id siempre lo genera la base de datos.
+        usuario.setId(null);
+        Usuario guardado = usuarioService.guardar(usuario);
+        return ResponseEntity
+                .created(URI.create("/api/usuarios/" + guardado.getId()))
+                .body(UsuarioDTO.desde(guardado));
     }
 
-    // Atiende PUT /api/usuarios/{id} para actualizar un usuario existente.
+    // PUT /api/usuarios/{id} -> 200 si se actualiza, 404 si no existe, 409 si el correo es de otro.
     @PutMapping("/{id}")
-    public UsuarioDTO actualizar(
+    public ResponseEntity<?> actualizar(
             @PathVariable Long id,
             @RequestBody Usuario usuario) {
         // Confirma que el ID exista; de lo contrario, no debe crear otro usuario.
-        usuarioService.obtenerPorId(id);
+        if (usuarioService.buscarPorId(id) == null) {
+            return noEncontrado(id);
+        }
+        if (correoOcupado(usuario.getEmail(), id)) {
+            return correoRepetido(usuario.getEmail());
+        }
         // Usa el ID de la URL y no uno que pudiera venir en el JSON.
         usuario.setId(id);
         // Guarda los cambios y devuelve el DTO sin exponer el password.
-        return UsuarioDTO.desde(usuarioService.guardar(usuario));
-    }
-    //Atiende DELETE /api/usuarios/{id} para eliminar un usuario existente.
-    @DeleteMapping("/{id}")
-    public void eliminar(@PathVariable Long id) {
-        usuarioService.eliminar(id);
+        return ResponseEntity.ok(UsuarioDTO.desde(usuarioService.guardar(usuario)));
     }
 
-    // Atiende GET /api/usuarios/rol/{rol} para filtrar por CLIENTE o ADMINISTRADOR.
+    // DELETE /api/usuarios/{id} -> 204 si se elimina, 404 si no existe.
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminar(@PathVariable Long id) {
+        if (usuarioService.buscarPorId(id) == null) {
+            return noEncontrado(id);
+        }
+        usuarioService.eliminar(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // GET /api/usuarios/rol/{rol} -> filtra por CLIENTE o ADMINISTRADOR.
     @GetMapping("/rol/{rol}")
-    public List<UsuarioDTO> listarPorRol(@PathVariable Rol rol) {
-        // Busca por rol y convierte los resultados a DTO antes de responder.
-        return usuarioService.listarPorRol(rol).stream()
+    public ResponseEntity<List<UsuarioDTO>> listarPorRol(@PathVariable Rol rol) {
+        List<UsuarioDTO> usuarios = usuarioService.listarPorRol(rol).stream()
                 .map(UsuarioDTO::desde)
                 .toList();
+        return ResponseEntity.ok(usuarios);
     }
 
+    // ---------------------------------------------------------------------
+    // Ayudas
+    // ---------------------------------------------------------------------
+
+    /** true si el correo ya lo tiene otro usuario distinto de idActual. */
+    private boolean correoOcupado(String email, Long idActual) {
+        if (email == null || email.isBlank()) {
+            return false;
+        }
+        Usuario conEseCorreo = usuarioService.buscarPorEmail(email.trim());
+        return conEseCorreo != null && !conEseCorreo.getId().equals(idActual);
+    }
+
+    private ResponseEntity<ErrorRespuestaDTO> noEncontrado(Long id) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorRespuestaDTO(404, "El usuario con id " + id + " no existe"));
+    }
+
+    private ResponseEntity<ErrorRespuestaDTO> correoRepetido(String email) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorRespuestaDTO(409, "Ya existe un usuario con el correo " + email));
+    }
 }
