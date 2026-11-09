@@ -69,6 +69,15 @@
 			<optional>true</optional>
 		</dependency>
 
+		<!-- springdoc-openapi: genera la documentacion OpenAPI (/v3/api-docs) y la
+		     interfaz Swagger UI (/swagger-ui/index.html) a partir de los controladores.
+		     Spring Boot 4.x necesita la linea 3.x de springdoc (la 2.x es para Boot 3.x). -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>3.1.1</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>

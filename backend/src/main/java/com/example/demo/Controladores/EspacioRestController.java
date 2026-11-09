@@ -27,6 +27,8 @@ import com.example.demo.DTO.ErrorRespuestaDTO;
 import com.example.demo.Entidades.Espacio;
 import com.example.demo.Servicios.EspacioService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 /**
@@ -42,6 +44,7 @@ import jakarta.validation.Valid;
  * Todos los endpoints devuelven ResponseEntity para controlar el codigo HTTP.
  * Las excepciones que no se atrapan aqui las convierte ManejadorErroresApi.
  */
+@Tag(name = "Espacios", description = "Canchas: listado paginado, consulta JPQL y CRUD")
 @RestController
 @RequestMapping("/api/espacios")
 @CrossOrigin(origins = "http://localhost:4200")
@@ -60,6 +63,7 @@ public class EspacioRestController {
      * PagedModel le da al JSON la forma acordada con Angular:
      * { content: [...], page: { size, number, totalElements, totalPages } }
      */
+    @Operation(summary = "Listar espacios paginados", description = "Parametros page (desde 0) y size. Por defecto 5 por pagina.")
     @GetMapping
     public ResponseEntity<PagedModel<EspacioDTO>> listar(
             @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
@@ -68,6 +72,7 @@ public class EspacioRestController {
     }
 
     /** GET por id: 200 con el espacio, o 404 si no existe. */
+    @Operation(summary = "Consultar espacio por id", description = "200 con el espacio o 404 si no existe.")
     @GetMapping("/{id}")
     public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
         Espacio espacio = espacioService.buscarPorId(id);
@@ -82,6 +87,7 @@ public class EspacioRestController {
      * GET con consulta JPQL (EspacioRepository.buscarPorRangoDePrecio):
      * /api/espacios/precio?min=30000&max=90000
      */
+    @Operation(summary = "Buscar espacios por rango de precio", description = "Consulta JPQL. Ejemplo: min=30000 y max=90000.")
     @GetMapping("/precio")
     public ResponseEntity<List<EspacioDTO>> buscarPorRangoDePrecio(
             @RequestParam(required = false) BigDecimal min,
@@ -97,6 +103,7 @@ public class EspacioRestController {
      * ManejadorErroresApi responde 400. Si sale bien responde 201 Created con
      * la cabecera Location apuntando al nuevo recurso.
      */
+    @Operation(summary = "Crear espacio", description = "201 si se crea; 400 si falla una validacion.")
     @PostMapping
     public ResponseEntity<EspacioDTO> crear(@Valid @RequestBody EspacioDTO dto) {
         Espacio espacio = dto.aEntidad();
@@ -108,6 +115,7 @@ public class EspacioRestController {
     }
 
     /** PUT: 404 si el id no existe (para no crear uno nuevo por error); 200 si se actualiza. */
+    @Operation(summary = "Actualizar espacio", description = "200 si se actualiza; 404 si no existe.")
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizar(@PathVariable Long id, @Valid @RequestBody EspacioDTO dto) {
         if (espacioService.buscarPorId(id) == null) {
@@ -121,6 +129,7 @@ public class EspacioRestController {
     }
 
     /** DELETE: 204 No Content si se elimina, 404 si no existe. */
+    @Operation(summary = "Eliminar espacio", description = "204 si se elimina; 404 si no existe.")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminar(@PathVariable Long id) {
         if (espacioService.buscarPorId(id) == null) {
