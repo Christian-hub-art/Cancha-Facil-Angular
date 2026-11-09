@@ -1,0 +1,16 @@
+<section class="login-page">
+  <div class="contenido">
+    <span class="logo">⚽ CanchaFácil</span>
+    <h1>Tu cancha, tu momento.</h1>
+    <p>Bienvenido de nuevo. Accede a tu cuenta.</p>
+  </div>
+
+  <app-login-form
+    [titulo]="'Ingreso al sistema'"
+    (loginEnviado)="procesarLogin($event)"
+  ></app-login-form>
+
+  @if (correoRecibido) {
+    <p class="aviso">Credenciales recibidas para: {{ correoRecibido }}</p>
+  }
+</section>

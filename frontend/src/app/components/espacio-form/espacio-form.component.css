@@ -1,0 +1,9 @@
+/* El diseño viene de estilos.css (el mismo de Thymeleaf).
+   Aquí solo se separa el formulario de las tarjetas de abajo. */
+:host {
+  display: block;
+}
+
+.formulario {
+  margin-bottom: 1.5rem;
+}

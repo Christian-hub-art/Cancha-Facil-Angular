@@ -1,0 +1,186 @@
+<section class="usuarios-page">
+  <div class="page-header">
+    <div>
+      <h2>Usuarios registrados</h2>
+      <button (click)="cargarUsuarios()">Recargar usuarios</button>
+      @if (mensajeError()) {
+        <p>{{ mensajeError() }}</p>
+      }
+      @for (usuario of usuarios(); track usuario.id) {
+        <p>{{ usuario.id }} - {{ usuario.nombre }}</p>
+      }
+
+      <h2>Punto 3 taller</h2>
+      @for (usuario of usuarios(); track usuario.id){
+        <button (click)="seleccionarUsuario(usuario.id!)">Ver {{usuario.id}}</button>
+      }
+      @if (usuarioActual(); as usuario){
+        <h3>Usuario seleccionado</h3>
+        <p>ID: {{usuario.id}}</p>
+        <p>Nombre: {{usuario.nombre}}</p>
+      }
+
+      <h2>Punto 4 taller</h2>
+
+      <button (click)="revisarEnOrden()">Revisar en orden</button>
+      <button (click)="revisarSimultaneamente()">Revisar simultáneamente</button>
+
+      <h3>Resultados</h3>
+
+      @for (usuario of resultadosRevision(); track usuario.id) {
+        <p>{{ usuario.nombre }}</p>
+      }
+
+
+
+    <h2>Punto 5 y 6- Subject, exhaustMap y async pipe</h2>
+
+    <button (click)="solicitarActualizacion()">
+      Actualizar listado
+    </button>
+
+    @if (mensajeError()) {
+      <p>{{ mensajeError() }}</p>
+    }
+
+    @for (usuario of (listado$ | async) ?? []; track usuario.id) {
+      <p>{{ usuario.nombre }}</p>
+
+      <button (click)="seleccionarUsuario(usuario.id!)">
+        Seleccionar
+      </button>
+    }
+
+
+    <h2>Punto 7 - BehaviorSubject</h2>
+
+    @if (usuarioSeleccionado$ | async; as usuario) {
+      <p>Selección compartida: {{ usuario.nombre }}</p>
+    }
+
+
+    <h2>Punto 8 - combineLatest</h2>
+
+    <label>Filtrar usuarios</label>
+
+    <input
+      [formControl]="filtroRxJS"
+      placeholder="Parte del nombre"
+    />
+
+    @for (usuario of (usuariosFiltrados$ | async) ?? []; track usuario.id) {
+      <p>{{ usuario.nombre }}</p>
+
+      <button (click)="seleccionarUsuario(usuario.id!)">
+        Seleccionar
+      </button>
+    }
+
+
+
+
+    <h2>Punto 9 - forkJoin</h2>
+
+    <button (click)="compararUsuarios()">
+      Consultar dos usuarios
+    </button>
+
+    @if (comparacion(); as datos) {
+      <h3>Comparación</h3>
+
+      <p>Primero: {{ datos.primero?.nombre }}</p>
+      <p>Segundo: {{ datos.segundo?.nombre }}</p>
+    }
+
+
+
+
+      <h1>Usuarios</h1>
+      <p>Usuarios y administradores registrados en la plataforma.</p>
+    </div>
+    <button (click)="examinarUsuario()">Examinar usuarios con RxJS</button>
+
+    <button class="btn btn-primary" type="button" (click)="mostrarFormulario = !mostrarFormulario">
+      Nuevo usuario
+    </button>
+  </div>
+
+  <div class="card">
+    @if (mostrarFormulario) {
+      <app-usuario-form (usuarioGuardado)="guardarUsuario($event)"></app-usuario-form>
+    }
+
+    <div class="toolbar">
+      <div class="search-box">
+        <span class="icon">⌕</span>
+        <input
+          type="text"
+          [(ngModel)]="filtro"
+          placeholder="Buscar por nombre"
+          aria-label="Buscar usuarios"
+        />
+      </div>
+      <button class="btn btn-secondary" type="button" (click)="limpiarFiltro()" *ngIf="filtro">
+        Limpiar
+      </button>
+    </div>
+
+    @if (usuariosFiltrados.length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">👥</div>
+        <strong>No hay usuarios para mostrar</strong>
+        <p>Prueba con otro nombre.</p>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Teléfono</th>
+              <th>Rol</th>
+              <th>Registro</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (usuario of usuariosFiltrados; track usuario.id) {
+              <tr>
+                <td>
+                  <div class="user-cell">
+                    <span class="avatar">{{ usuario.nombre.charAt(0) }}</span>
+                    <div>
+                      <span class="principal">{{ usuario.nombre }}</span>
+                      <span class="secondary">{{ usuario.email }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ usuario.telefono }}</td>
+                <td>
+                  <span
+                    class="badge"
+                    [ngClass]="usuario.rol === 'ADMINISTRADOR' ? 'badge-blue' : 'badge-green'"
+                  >
+                    {{ usuario.rol }}
+                  </span>
+                </td>
+                <td class="muted">{{ usuario.fechaRegistro | date: 'dd MMM yyyy' }}</td>
+                <td>
+                  <div class="actions">
+                    <button class="btn btn-light" type="button">Ver</button>
+                    <button class="btn btn-light" type="button" aria-label="Editar usuario">
+                      ✎
+                    </button>
+                    <button class="btn btn-danger" type="button" aria-label="Eliminar usuario">
+                      🗑
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>

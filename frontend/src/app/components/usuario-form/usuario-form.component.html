@@ -1,0 +1,29 @@
+<form class="usuario-form" (ngSubmit)="guardar()">
+  <div class="campo-form">
+    <label for="nombre">Nombre</label>
+    <input class="control" type="text" id="nombre" [(ngModel)]="nombre" name="nombre" />
+    @if (nombre === '') {
+      <p class="ayuda">Debe ingresar el nombre del usuario.</p>
+    }
+  </div>
+
+  <div class="campo-form">
+    <label for="email">Correo</label>
+    <input class="control" type="email" id="email" [(ngModel)]="email" name="email" />
+  </div>
+
+  <div class="campo-form">
+    <label for="telefono">Teléfono</label>
+    <input class="control" type="text" id="telefono" [(ngModel)]="telefono" name="telefono" />
+  </div>
+
+  <div class="campo-form">
+    <label for="rol">Rol</label>
+    <select class="control" id="rol" [(ngModel)]="rol" name="rol">
+      <option value="CLIENTE">CLIENTE</option>
+      <option value="ADMINISTRADOR">ADMINISTRADOR</option>
+    </select>
+  </div>
+
+  <button class="btn btn-primary" type="submit">Guardar usuario</button>
+</form>
