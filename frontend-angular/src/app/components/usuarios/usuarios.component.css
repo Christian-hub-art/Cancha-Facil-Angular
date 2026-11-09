@@ -250,3 +250,20 @@
     align-items: flex-start;
   }
 }
+
+.detalle-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  padding: 1.5rem;
+}
+
+.detalle-info p {
+  margin: 0 0 1rem;
+}
+
+@media (max-width: 700px) {
+  .detalle-info {
+    grid-template-columns: 1fr;
+  }
+}

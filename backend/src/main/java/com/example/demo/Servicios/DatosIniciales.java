@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,10 +90,17 @@ public class DatosIniciales implements CommandLineRunner {
             log.info("Usuario administrador creado: admin@canchafacil.com / admin123");
         }
 
-        if (!baseVacia) {
-            return;
+        if (baseVacia) {
+            cargarDatosDeEjemplo(admin);
         }
 
+        // Se ejecuta siempre (no solo con la base vacia) para que la paginacion
+        // de /api/espacios tenga varias paginas aunque la BD ya exista.
+        completarEspaciosParaPaginacion(admin);
+    }
+
+    /** Datos de ejemplo completos; solo se cargan la primera vez (base vacia). */
+    private void cargarDatosDeEjemplo(Usuario admin) {
         // ---------- Usuarios ----------
         Usuario laura = usuarioRepository.save(usuario("Laura Gomez", "laura@correo.com",
                 "cliente123", "3104445566", "Carrera 45 # 12-08", Rol.CLIENTE));
@@ -141,6 +149,53 @@ public class DatosIniciales implements CommandLineRunner {
                 "Bienvenido a CanchaFacil. Se cargaron datos de ejemplo."));
 
         log.info("Datos iniciales cargados: 3 usuarios, 2 negocios, 4 espacios, 5 reservas.");
+    }
+
+    /**
+     * Paginacion: con 5 espacios por pagina se necesitan mas de 5 para ver varias
+     * paginas. Si hay menos de MINIMO_ESPACIOS, se agregan canchas de ejemplo
+     * (sin repetir nombres) al primer negocio que exista.
+     */
+    private static final int MINIMO_ESPACIOS = 12;
+
+    private void completarEspaciosParaPaginacion(Usuario admin) {
+        if (espacioRepository.count() >= MINIMO_ESPACIOS) {
+            return;
+        }
+
+        Negocio negocio = negocioRepository.findAll().stream().findFirst()
+                .orElseGet(() -> negocioRepository.save(negocio(admin, "Complejo Deportivo El Bosque",
+                        "900123456-1", "Calle 134 # 7-20", "Canchas sinteticas con iluminacion y parqueadero.")));
+
+        String[][] canchas = {
+                {"Polideportivo Kennedy - Micro 1", "microfutbol", "30000", "10", "Cancha publica. Piso en concreto."},
+                {"Parque El Tunal - Micro", "microfutbol", "25000", "10", "Cancha publica con iluminacion."},
+                {"Colegio San Bartolome - Micro", "microfutbol", "40000", "10", "Colegio. Disponible fines de semana."},
+                {"Colegio Champagnat - Cancha", "futbol 5", "50000", "10", "Colegio. Grama sintetica."},
+                {"Universidad Javeriana - Micro", "microfutbol", "45000", "10", "Universidad. Coliseo cubierto."},
+                {"Universidad Nacional - Cancha 2", "futbol 8", "90000", "16", "Universidad. Grama natural."},
+                {"Parque Simon Bolivar - Micro 3", "microfutbol", "20000", "10", "Cancha publica."},
+                {"Complejo El Bosque - Micro", "microfutbol", "60000", "10", "Negocio privado. Bajo techo."},
+                {"Canchas La 70 - Cancha B", "futbol 5", "70000", "10", "Negocio privado. Incluye balon."},
+                {"Unicentro Sport - Futbol 8", "futbol 8", "110000", "16", "Negocio privado. Grama sintetica."},
+        };
+
+        List<String> existentes = espacioRepository.findAll().stream()
+                .map(Espacio::getNombre)
+                .toList();
+
+        int agregados = 0;
+        for (String[] c : canchas) {
+            if (espacioRepository.count() >= MINIMO_ESPACIOS) {
+                break;
+            }
+            if (existentes.contains(c[0])) {
+                continue;
+            }
+            espacioRepository.save(espacio(negocio, c[0], c[1], c[2], Integer.parseInt(c[3]), c[4]));
+            agregados++;
+        }
+        log.info("Se agregaron {} espacios de ejemplo para la paginacion.", agregados);
     }
 
     /** Usuarios creados antes del login tenian la clave en texto plano. */
