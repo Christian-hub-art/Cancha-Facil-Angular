@@ -8,6 +8,6 @@ RUN npm run build
 
 # Etapa 2: Servir Angular con Nginx
 FROM nginx:alpine
-COPY --from=compilacion /app/dist/nombre-proyecto/browser/ /usr/share/nginx/html/
+COPY --from=compilacion /app/dist/frontend-angular/browser/ /usr/share/nginx/html/
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80

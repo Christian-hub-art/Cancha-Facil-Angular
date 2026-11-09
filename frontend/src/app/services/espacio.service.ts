@@ -18,7 +18,7 @@ export class EspacioService {
   // true  = usa datos de prueba en memoria (mientras el backend de espacios no está listo).
   // false = hace las peticiones HTTP reales a Spring Boot.
   // Los componentes funcionan igual en los dos casos porque siempre reciben un Observable.
-  private readonly usarDatosDePrueba = true;
+  private readonly usarDatosDePrueba = false;
 
   // GET /api/espacios?page=0&size=5 -> una página de espacios.
   listar(pagina: number, tamano: number): Observable<Pagina<Espacio>> {

@@ -1,0 +1,21 @@
+/* La barra y los botones vienen de estilos.css (los mismos de Thymeleaf).
+   Aquí solo se centra el contenido y se ajusta la barra en pantallas pequeñas. */
+.app-main {
+  margin: 0 auto;
+}
+
+.contador-visitas {
+  gap: 0.6rem;
+}
+
+@media (max-width: 720px) {
+  .nav-publica .interior {
+    flex-wrap: wrap;
+  }
+  .nav-publica .enlaces {
+    gap: 1.2rem;
+  }
+  .app-main {
+    padding: 1.5rem 1rem 2rem;
+  }
+}
