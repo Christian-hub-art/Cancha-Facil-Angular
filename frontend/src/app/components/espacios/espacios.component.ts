@@ -5,6 +5,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { Espacio } from '../../models/espacio.model';
 import { EspacioService } from '../../services/espacio.service';
 import { EspacioForm } from '../espacio-form/espacio-form.component'; // Componente hijo.
+import { BotonPagarComponent } from '../../pagos/boton-pagar.component'; // Pago con Wompi.
 
 // Formato colombiano para el pipe currency: $ 80.000 en lugar de $80,000.
 registerLocaleData(localeEsCo);
@@ -17,7 +18,7 @@ interface Mensaje {
 
 @Component({
   standalone: true,
-  imports: [CurrencyPipe, UpperCasePipe, EspacioForm],
+  imports: [CurrencyPipe, UpperCasePipe, EspacioForm, BotonPagarComponent],
   selector: 'app-espacios',
   styleUrl: './espacios.component.css',
   templateUrl: './espacios.component.html',

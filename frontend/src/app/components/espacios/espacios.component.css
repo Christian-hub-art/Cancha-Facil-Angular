@@ -76,3 +76,8 @@
   display: flex;
   gap: 0.5rem;
 }
+
+/* Botón de pago con Wompi en cada tarjeta */
+.pagar-cancha {
+  margin-top: 0.75rem;
+}
