@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/layout :: head(${accion})}"></head>
+<body class="app">
+
+<header th:replace="~{fragmentos/layout :: topbar}"></header>
+
+<div class="app-cuerpo">
+    <aside th:replace="~{fragmentos/layout :: sidebar('calificaciones')}"></aside>
+
+    <main class="app-main">
+        <div class="pagina-cabecera">
+            <div>
+            <div class="migas"><a th:href="@{/calificaciones}">Calificaciones</a><span>/</span><span th:text="${accion}">Nueva</span></div>
+                <h1 th:text="${accion}">Crear calificación</h1>
+                <p>El jugador y la cancha se toman de la reserva. Cada reserva se califica una sola vez.</p>
+            </div>
+            <div class="acciones"></div>
+        </div>
+
+        <th:block th:replace="~{fragmentos/layout :: alertas}"></th:block>
+        <div class="tarjeta">
+            <form class="tarjeta-cuerpo" th:action="@{/calificaciones/add}" th:object="${calificacion}" method="post" novalidate>
+                <div class="alerta alerta-error" th:if="${#fields.hasGlobalErrors()}">
+                    <th:block th:replace="~{fragmentos/iconos :: icono('alerta')}"></th:block>
+                    <div><div th:each="err : ${#fields.globalErrors()}" th:text="${err}">Error</div></div>
+                </div>
+                <input type="hidden" th:field="*{id}">
+                <div class="form-grid">
+                    <div class="campo-form completo">
+                        <label for="reservaId">Reserva que se califica</label>
+                        <select class="control" id="reservaId" name="reservaId">
+                            <option value="">-- Seleccione --</option>
+                            <option th:each="r : ${reservas}" th:value="${r.id}" th:text="'#' + ${r.id} + ' · ' + (${r.espacio != null} ? ${r.espacio.nombre} : '') + ' · ' + ${r.fecha} + ' · ' + ${r.estado}"
+                                    th:selected="${calificacion.reserva != null and calificacion.reserva.id == r.id}">Opcion</option>
+                        </select>
+                    </div>
+                    <div class="campo-form completo">
+                        <label for="puntuacion">Puntuación</label>
+                        <select class="control" id="puntuacion" th:field="*{puntuacion}" th:errorclass="campo-invalido">
+                            <option value="">-- Seleccione --</option>
+                            <option value="5">★★★★★  Excelente</option>
+                            <option value="4">★★★★☆  Muy buena</option>
+                            <option value="3">★★★☆☆  Buena</option>
+                            <option value="2">★★☆☆☆  Regular</option>
+                            <option value="1">★☆☆☆☆  Mala</option>
+                        </select>
+                        <span class="error-campo" th:if="${#fields.hasErrors('puntuacion')}" th:errors="*{puntuacion}"></span>
+                    </div>
+                    <div class="campo-form completo">
+                        <label for="comentario">Comentario</label>
+                        <textarea class="control" id="comentario" th:field="*{comentario}" th:errorclass="campo-invalido" rows="3" placeholder="¿Qué te pareció la cancha?"></textarea>
+                        <span class="error-campo" th:if="${#fields.hasErrors('comentario')}" th:errors="*{comentario}"></span>
+                    </div>
+                </div>
+                <div class="form-acciones">
+                    <a class="btn btn-neutro" th:href="@{/calificaciones}">Cancelar</a>
+                    <button class="btn btn-primario" type="submit"><th:block th:replace="~{fragmentos/iconos :: icono('check')}"></th:block> Guardar</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<footer th:replace="~{fragmentos/layout :: footer-app}"></footer>
+
+</body>
+</html>

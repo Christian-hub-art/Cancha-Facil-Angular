@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/layout :: head(${accion})}"></head>
+<body class="app">
+
+<header th:replace="~{fragmentos/layout :: topbar}"></header>
+
+<div class="app-cuerpo">
+    <aside th:replace="~{fragmentos/layout :: sidebar('pagos')}"></aside>
+
+    <main class="app-main">
+        <div class="pagina-cabecera">
+            <div>
+            <div class="migas"><a th:href="@{/pagos}">Pagos</a><span>/</span><span th:text="${accion}">Nuevo</span></div>
+                <h1 th:text="${accion}">Registrar pago</h1>
+                <p>Todo pago nuevo queda PENDIENTE hasta que se apruebe.</p>
+            </div>
+            <div class="acciones"></div>
+        </div>
+
+        <th:block th:replace="~{fragmentos/layout :: alertas}"></th:block>
+        <div class="tarjeta">
+            <form class="tarjeta-cuerpo" th:action="@{/pagos/add}" th:object="${pago}" method="post" novalidate>
+                <div class="alerta alerta-error" th:if="${#fields.hasGlobalErrors()}">
+                    <th:block th:replace="~{fragmentos/iconos :: icono('alerta')}"></th:block>
+                    <div><div th:each="err : ${#fields.globalErrors()}" th:text="${err}">Error</div></div>
+                </div>
+                <div class="alerta alerta-info" th:if="${#lists.isEmpty(reservas)}">
+                    <th:block th:replace="~{fragmentos/iconos :: icono('alerta')}"></th:block>
+                    <span>Primero crea una reserva para poder registrar su pago.</span>
+                </div>
+                <input type="hidden" th:field="*{id}">
+                <div class="form-grid">
+                    <div class="campo-form completo">
+                        <label for="reservaId">Reserva</label>
+                        <select class="control" id="reservaId" name="reservaId">
+                            <option value="">-- Seleccione --</option>
+                            <option th:each="r : ${reservas}" th:value="${r.id}" th:text="'#' + ${r.id} + ' · ' + (${r.espacio != null} ? ${r.espacio.nombre} : '') + ' · ' + ${r.fecha} + ' ' + ${r.horaInicio}"
+                                    th:selected="${pago.reserva != null and pago.reserva.id == r.id}">Opcion</option>
+                        </select>
+                    </div>
+                    <div class="campo-form">
+                        <label for="monto">Monto (COP)</label>
+                        <input class="control" type="number" id="monto" th:field="*{monto}" th:errorclass="campo-invalido" placeholder="80000" step="1000" min="0">
+                        <span class="error-campo" th:if="${#fields.hasErrors('monto')}" th:errors="*{monto}"></span>
+                    </div>
+                    <div class="campo-form">
+                        <label for="metodoPago">Método de pago</label>
+                        <input class="control" type="text" id="metodoPago" th:field="*{metodoPago}" th:errorclass="campo-invalido" placeholder="Tarjeta, PSE, Nequi..." list="metodos">
+                        <span class="error-campo" th:if="${#fields.hasErrors('metodoPago')}" th:errors="*{metodoPago}"></span>
+                    </div>
+                    <div class="campo-form completo">
+                        <label for="referencia">Referencia</label>
+                        <input class="control" type="text" id="referencia" th:field="*{referencia}" th:errorclass="campo-invalido" placeholder="TRX-0001">
+                        <span class="ayuda">Código de la transacción (opcional).</span>
+                        <span class="error-campo" th:if="${#fields.hasErrors('referencia')}" th:errors="*{referencia}"></span>
+                    </div>
+                    <datalist id="metodos"><option value="Tarjeta"><option value="PSE"><option value="Nequi"><option value="Efectivo"></datalist>
+                </div>
+                <div class="form-acciones">
+                    <a class="btn btn-neutro" th:href="@{/pagos}">Cancelar</a>
+                    <button class="btn btn-primario" type="submit"><th:block th:replace="~{fragmentos/iconos :: icono('check')}"></th:block> Guardar</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<footer th:replace="~{fragmentos/layout :: footer-app}"></footer>
+
+</body>
+</html>

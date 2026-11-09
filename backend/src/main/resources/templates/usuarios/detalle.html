@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/layout :: head(${usuario.nombre})}"></head>
+<body class="app">
+
+<header th:replace="~{fragmentos/layout :: topbar}"></header>
+
+<div class="app-cuerpo">
+    <aside th:replace="~{fragmentos/layout :: sidebar('usuarios')}"></aside>
+
+    <main class="app-main">
+        <div class="pagina-cabecera">
+            <div>
+            <div class="migas"><a th:href="@{/usuarios}">Usuarios</a><span>/</span><span th:text="${usuario.nombre}">Usuario</span></div>
+                <h1 th:text="${usuario.nombre}">Usuario</h1>
+                <p>Detalle de la cuenta.</p>
+            </div>
+            <div class="acciones"><a class="btn btn-neutro" th:href="@{/reservas(usuarioId=${usuario.id})}"><th:block th:replace="~{fragmentos/iconos :: icono('calendario')}"></th:block> Reservas</a><a class="btn btn-neutro" th:href="@{/notificaciones(usuarioId=${usuario.id})}"><th:block th:replace="~{fragmentos/iconos :: icono('campana')}"></th:block> Notificaciones</a><a class="btn btn-contorno" th:href="@{/usuarios/update/{id}(id=${usuario.id})}">Editar usuario</a></div>
+        </div>
+
+        <th:block th:replace="~{fragmentos/layout :: alertas}"></th:block>
+
+        <div class="tarjeta perfil-resumen">
+            <span class="avatar avatar-lg" th:text="${#strings.substring(usuario.nombre,0,1)}">D</span>
+            <div class="info">
+                <h2 th:text="${usuario.nombre}">David</h2>
+                <div class="correo" th:text="${usuario.email}">correo</div>
+                <div class="lugar"><th:block th:replace="~{fragmentos/iconos :: icono('ubicacion')}"></th:block><span th:text="${usuario.direccion}">Bogotá</span></div>
+            </div>
+            <span class="insignia" th:classappend="${usuario.rol != null and usuario.rol.name() == 'ADMINISTRADOR'} ? 'insignia-azul' : 'insignia-verde'" th:text="${usuario.rol}">CLIENTE</span>
+        </div>
+        <div class="grid-2" style="margin-top:1.5rem">
+            <div class="tarjeta tarjeta-cuerpo">
+                <h3 class="tarjeta-titulo">Información personal</h3>
+                <dl class="datos">
+                    <div class="fila"><dt>Teléfono</dt><dd th:text="${usuario.telefono}">300</dd></div>
+                    <div class="fila"><dt>Dirección</dt><dd th:text="${usuario.direccion}">Calle</dd></div>
+                    <div class="fila"><dt>Fecha de registro</dt><dd th:text="${usuario.fechaRegistro != null} ? ${#temporals.format(usuario.fechaRegistro, 'dd/MM/yyyy')} : '—'">-</dd></div>
+                </dl>
+            </div>
+            <div class="tarjeta tarjeta-cuerpo">
+                <h3 class="tarjeta-titulo">Actividad</h3>
+                <dl class="datos">
+                    <div class="fila"><dt>Reservas</dt><dd class="verde" th:text="${#lists.size(usuario.reservas)}">3</dd></div>
+                    <div class="fila"><dt>Calificaciones</dt><dd class="verde" th:text="${#lists.size(usuario.calificaciones)}">2</dd></div>
+                    <div class="fila"><dt>Negocios que administra</dt><dd class="verde" th:text="${totalNegocios}">0</dd></div>
+                </dl>
+            </div>
+        </div>
+    </main>
+</div>
+
+<footer th:replace="~{fragmentos/layout :: footer-app}"></footer>
+
+</body>
+</html>

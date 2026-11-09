@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<!--
+  Piezas comunes del diseno. Cada pagina las inserta con th:replace:
+    head(titulo)      -> <head> con fuentes y estilos
+    topbar            -> barra superior de la app (con sesion)
+    sidebar(activo)   -> menu lateral; "activo" marca la opcion actual
+    footer-app        -> pie oscuro de la app
+    alertas           -> mensaje de exito que llega por RedirectAttributes
+    nav-publica(activo) / footer-publico -> para portada, login y registro
+-->
+
+<head th:fragment="head(titulo)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${titulo} + ' · CanchaFácil'">CanchaFácil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body>
+
+<!-- ===================== Marca ===================== -->
+<a th:fragment="marca" class="marca" th:href="@{/}">
+    <span class="isotipo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </span>
+    <span>CanchaFácil</span>
+</a>
+
+<!-- ===================== Barra superior (app) ===================== -->
+<header th:fragment="topbar" class="topbar">
+    <div class="interior">
+        <a th:replace="~{fragmentos/layout :: marca}"></a>
+        <div class="derecha">
+            <a class="campana" th:href="@{/notificaciones}" title="Notificaciones">
+                <th:block th:replace="~{fragmentos/iconos :: icono('campana')}"></th:block>
+                <span class="contador" th:if="${@sesion.notificacionesSinLeer > 0}"
+                      th:text="${@sesion.notificacionesSinLeer}">2</span>
+            </a>
+            <span class="divisor"></span>
+            <a class="usuario-mini" th:href="@{/perfil}">
+                <span class="avatar" th:text="${@sesion.iniciales}">DM</span>
+                <span th:text="${@sesion.nombre}">David Morales</span>
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- ===================== Menu lateral ===================== -->
+<aside th:fragment="sidebar(activo)" class="sidebar">
+    <nav>
+        <a th:href="@{/perfil}" th:classappend="${activo == 'perfil'} ? 'activo'">
+            <th:block th:replace="~{fragmentos/iconos :: icono('usuario')}"></th:block> Mi perfil</a>
+        <a th:href="@{/reservas/mis-reservas}" th:classappend="${activo == 'mis-reservas'} ? 'activo'">
+            <th:block th:replace="~{fragmentos/iconos :: icono('calendario')}"></th:block> Mis reservas</a>
+        <a th:href="@{/espacios}" th:classappend="${activo == 'canchas'} ? 'activo'">
+            <th:block th:replace="~{fragmentos/iconos :: icono('cancha')}"></th:block> Canchas</a>
+        <a th:href="@{/notificaciones}" th:classappend="${activo == 'notificaciones'} ? 'activo'">
+            <th:block th:replace="~{fragmentos/iconos :: icono('campana')}"></th:block> Notificaciones</a>
+
+        <span class="grupo">Gestión</span>
+        <a th:href="@{/reservas}" th:classappend="${activo == 'reservas'} ? 'activo'">
+            <th:block th:replace="~{fragmentos/iconos :: icono('calendario-check')}"></th:block> Reservas</a>
+        <a th:href="@{/pagos}" th:classappend="${activo == 'pagos'} ? 'activo'">
+            <th:block th:replace="~{fragmentos/iconos :: icono('tarjeta')}"></th:block> Pagos</a>
+        <a th:href="@{/calificaciones}" th:classappend="${activo == 'calificaciones'} ? 'activo'">
+            <th:block th:replace="~{fragmentos/iconos :: icono('estrella')}"></th:block> Calificaciones</a>
+        <a th:href="@{/negocios}" th:classappend="${activo == 'negocios'} ? 'activo'">
+            <th:block th:replace="~{fragmentos/iconos :: icono('edificio')}"></th:block> Negocios</a>
+        <a th:if="${@sesion.admin}" th:href="@{/usuarios}" th:classappend="${activo == 'usuarios'} ? 'activo'">
+            <th:block th:replace="~{fragmentos/iconos :: icono('usuarios')}"></th:block> Usuarios</a>
+        <a th:href="@{/consultas}" th:classappend="${activo == 'consultas'} ? 'activo'">
+            <th:block th:replace="~{fragmentos/iconos :: icono('grafico')}"></th:block> Consultas</a>
+
+        <!-- El logout es POST: th:action agrega el token CSRF -->
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="item">
+                <th:block th:replace="~{fragmentos/iconos :: icono('salir')}"></th:block> Cerrar sesión</button>
+        </form>
+    </nav>
+
+    <div class="promo">
+        <th:block th:replace="~{fragmentos/iconos :: icono('escudo')}"></th:block>
+        <strong>¿Listo para jugar?</strong>
+        <p>Encuentra una cancha disponible y reserva tu próximo partido en segundos.</p>
+        <a th:href="@{/reservas/add}">Reservar ahora →</a>
+    </div>
+</aside>
+
+<!-- ===================== Pie de la app ===================== -->
+<footer th:fragment="footer-app" class="footer-app">
+    <div class="interior">
+        <div class="redes">
+            <span>Síguenos en redes:</span>
+            <a href="#" aria-label="Instagram"><th:block th:replace="~{fragmentos/iconos :: icono('instagram')}"></th:block></a>
+            <a href="#" aria-label="Facebook"><th:block th:replace="~{fragmentos/iconos :: icono('facebook')}"></th:block></a>
+            <a href="#" aria-label="Twitter"><th:block th:replace="~{fragmentos/iconos :: icono('twitter')}"></th:block></a>
+        </div>
+        <div class="legales">
+            <a href="#">Términos</a>
+            <a href="#">Privacidad</a>
+            <a href="#">Ayuda</a>
+        </div>
+    </div>
+</footer>
+
+<!-- ===================== Mensajes flash ===================== -->
+<th:block th:fragment="alertas">
+    <div class="alerta alerta-exito" th:if="${exito}">
+        <th:block th:replace="~{fragmentos/iconos :: icono('check-circulo')}"></th:block>
+        <span th:text="${exito}">Guardado</span>
+    </div>
+    <div class="alerta alerta-error" th:if="${error}">
+        <th:block th:replace="~{fragmentos/iconos :: icono('alerta')}"></th:block>
+        <span th:text="${error}">Error</span>
+    </div>
+</th:block>
+
+<!-- ===================== Barra publica ===================== -->
+<header th:fragment="nav-publica(activo)" class="nav-publica">
+    <div class="interior">
+        <a th:replace="~{fragmentos/layout :: marca}"></a>
+        <nav class="enlaces">
+            <a th:href="@{/}" th:classappend="${activo == 'inicio'} ? 'activo'">Inicio</a>
+            <a th:href="@{/espacios}">Canchas</a>
+            <a th:href="@{/reservas/mis-reservas}">Mis reservas</a>
+            <a th:href="@{/#como-funciona}">Cómo funciona</a>
+        </nav>
+        <div class="acciones">
+            <th:block th:unless="${@sesion.autenticado}">
+                <a class="btn btn-texto" th:href="@{/login}">Iniciar sesión</a>
+                <a class="btn btn-primario" th:href="@{/registro}">Registrarme</a>
+            </th:block>
+            <th:block th:if="${@sesion.autenticado}">
+                <a class="usuario-mini" th:href="@{/perfil}">
+                    <span class="avatar" th:text="${@sesion.iniciales}">DM</span>
+                    <span th:text="${@sesion.nombre}">David</span>
+                </a>
+                <a class="btn btn-primario" th:href="@{/perfil}">Mi panel</a>
+            </th:block>
+        </div>
+    </div>
+</header>
+
+<footer th:fragment="footer-publico" class="footer-publico">
+    <div class="interior">
+        <a th:replace="~{fragmentos/layout :: marca}"></a>
+        <span>© 2026 CanchaFácil · Reserva canchas de fútbol fácil, rápido y seguro.</span>
+        <div style="display:flex; gap:1.5rem">
+            <a href="#">Términos</a><a href="#">Privacidad</a><a href="#">Ayuda</a>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

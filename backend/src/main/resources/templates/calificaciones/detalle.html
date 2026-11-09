@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/layout :: head('Calificación #' + ${calificacion.id})}"></head>
+<body class="app">
+
+<header th:replace="~{fragmentos/layout :: topbar}"></header>
+
+<div class="app-cuerpo">
+    <aside th:replace="~{fragmentos/layout :: sidebar('calificaciones')}"></aside>
+
+    <main class="app-main">
+        <div class="pagina-cabecera">
+            <div>
+            <div class="migas"><a th:href="@{/calificaciones}">Calificaciones</a><span>/</span><span th:text="'#' + ${calificacion.id}">#1</span></div>
+                <h1 th:text="'Calificación #' + ${calificacion.id}">Calificación</h1>
+                <p>Opinión registrada sobre la cancha.</p>
+            </div>
+            <div class="acciones"><a class="btn btn-neutro" th:href="@{/calificaciones/update/{id}(id=${calificacion.id})}"><th:block th:replace="~{fragmentos/iconos :: icono('editar')}"></th:block> Editar</a></div>
+        </div>
+
+        <th:block th:replace="~{fragmentos/layout :: alertas}"></th:block>
+
+        <div class="grid-2">
+            <div class="tarjeta tarjeta-cuerpo">
+                <div class="promedio-grande" style="margin-bottom:.4rem"><span class="valor" th:text="${calificacion.puntuacion}">5</span><span class="de">/ 5</span></div>
+                <span th:replace="~{fragmentos/iconos :: estrellas(${calificacion.puntuacion})}"></span>
+                <p class="texto-largo" style="margin-top:1.2rem" th:text="${calificacion.comentario != null and !#strings.isEmpty(calificacion.comentario)} ? ${calificacion.comentario} : 'Sin comentario'">Excelente</p>
+            </div>
+            <div class="tarjeta tarjeta-cuerpo">
+                <h3 class="tarjeta-titulo">Datos</h3>
+                <dl class="datos">
+                    <div class="fila"><dt>Jugador</dt><dd th:text="${calificacion.usuario != null} ? ${calificacion.usuario.nombre} : '-'">Laura</dd></div>
+                    <div class="fila"><dt>Cancha</dt><dd><a th:if="${calificacion.espacio != null}" th:href="@{/espacios/{id}(id=${calificacion.espacio.id})}" th:text="${calificacion.espacio.nombre}">Cancha</a></dd></div>
+                    <div class="fila"><dt>Reserva</dt><dd><a th:if="${calificacion.reserva != null}" th:href="@{/reservas/{id}(id=${calificacion.reserva.id})}" th:text="'#' + ${calificacion.reserva.id}">#1</a></dd></div>
+                    <div class="fila"><dt>Fecha</dt><dd th:text="${calificacion.fecha != null} ? ${#temporals.format(calificacion.fecha, 'dd/MM/yyyy')} : '—'">-</dd></div>
+                </dl>
+            </div>
+        </div>
+    </main>
+</div>
+
+<footer th:replace="~{fragmentos/layout :: footer-app}"></footer>
+
+</body>
+</html>

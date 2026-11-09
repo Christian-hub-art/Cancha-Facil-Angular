@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/layout :: head(${titulo})}"></head>
+<body class="app">
+
+<header th:replace="~{fragmentos/layout :: topbar}"></header>
+
+<div class="app-cuerpo">
+    <aside th:replace="~{fragmentos/layout :: sidebar('negocios')}"></aside>
+
+    <main class="app-main">
+        <div class="pagina-cabecera">
+            <div>
+                <h1 th:text="${titulo}">Negocios</h1>
+                <p>Complejos deportivos que publican sus canchas en CanchaFácil.</p>
+            </div>
+            <div class="acciones"><a class="btn btn-primario" th:href="@{/negocios/add}"><th:block th:replace="~{fragmentos/iconos :: icono('mas')}"></th:block> Nuevo negocio</a></div>
+        </div>
+
+        <th:block th:replace="~{fragmentos/layout :: alertas}"></th:block>
+
+        <div class="tarjeta">
+            <div class="herramientas">
+                <form th:action="@{/negocios}" method="get">
+                    <div class="busqueda">
+                        <th:block th:replace="~{fragmentos/iconos :: icono('buscar')}"></th:block>
+                        <input class="control" type="text" name="nombre" placeholder="Buscar por nombre" th:value="${param.nombre}">
+                    </div>
+                    <button class="btn btn-neutro btn-sm" type="submit">Buscar</button>
+                    <a class="btn btn-texto btn-sm" th:if="${param.nombre != null}" th:href="@{/negocios}">Limpiar</a>
+                </form>
+            </div>
+
+            <div th:if="${#lists.isEmpty(negocios)}">
+            <div class="vacio">
+                <div class="icono-vacio"><th:block th:replace="~{fragmentos/iconos :: icono('edificio')}"></th:block></div>
+                <strong>No hay negocios para mostrar</strong>
+                <p>Registra un negocio para empezar a publicar canchas.</p>
+                <a class="btn btn-primario" th:href="@{/negocios/add}"><th:block th:replace="~{fragmentos/iconos :: icono('mas')}"></th:block> Nuevo negocio</a>
+            </div>
+            </div>
+
+            <div class="tabla-envoltura" th:unless="${#lists.isEmpty(negocios)}">
+                <table class="tabla">
+                    <thead><tr><th>#</th><th>Negocio</th><th>NIT</th><th>Dirección</th><th>Administrador</th><th>Canchas</th><th>Acciones</th></tr></thead>
+                    <tbody>
+                    <tr th:each="n : ${negocios}">
+                        <td class="id" th:text="${n.id}">1</td>
+                        <td><span class="principal" th:text="${n.nombre}">El Bosque</span></td>
+                        <td class="id" th:text="${n.nit}">900</td>
+                        <td th:text="${n.direccion}">Calle 1</td>
+                        <td th:text="${n.administrador != null} ? ${n.administrador.nombre} : '-'">Admin</td>
+                        <td><span class="insignia insignia-verde" th:text="${#lists.size(n.espacios)}">2</span></td>
+                        <td>
+                            <div class="acciones-fila">
+                                <a class="btn btn-neutro btn-sm" th:href="@{/negocios/{id}(id=${n.id})}">Ver</a>
+                                <a class="btn btn-neutro btn-sm" th:href="@{/negocios/update/{id}(id=${n.id})}" title="Editar"><th:block th:replace="~{fragmentos/iconos :: icono('editar')}"></th:block></a>
+                                <a class="btn btn-peligro btn-sm" th:href="@{/negocios/delete/{id}(id=${n.id})}"
+                                   onclick="return confirm('¿Eliminar este negocio? Se eliminan también sus canchas y reservas.')" title="Eliminar"><th:block th:replace="~{fragmentos/iconos :: icono('basura')}"></th:block></a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<footer th:replace="~{fragmentos/layout :: footer-app}"></footer>
+
+</body>
+</html>

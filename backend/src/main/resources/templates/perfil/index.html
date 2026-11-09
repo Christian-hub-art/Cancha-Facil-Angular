@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/layout :: head('Mi perfil')}"></head>
+<body class="app">
+
+<header th:replace="~{fragmentos/layout :: topbar}"></header>
+
+<div class="app-cuerpo">
+    <aside th:replace="~{fragmentos/layout :: sidebar('perfil')}"></aside>
+
+    <main class="app-main">
+        <div class="pagina-cabecera">
+            <div>
+                <h1 >Mi perfil</h1>
+                <p>Gestiona tu información personal, tu cuenta y tus estadísticas de juego.</p>
+            </div>
+            <div class="acciones"></div>
+        </div>
+
+        <th:block th:replace="~{fragmentos/layout :: alertas}"></th:block>
+
+        <!-- Resumen -->
+        <div class="tarjeta perfil-resumen">
+            <span class="avatar avatar-lg" th:text="${@sesion.iniciales}">DM</span>
+            <div class="info">
+                <h2 th:text="${usuario.nombre}">David Morales</h2>
+                <div class="correo" th:text="${usuario.email}">david.morales@email.com</div>
+                <div class="lugar"><th:block th:replace="~{fragmentos/iconos :: icono('ubicacion')}"></th:block><span th:text="${usuario.direccion}">Bogotá, Colombia</span></div>
+            </div>
+            <a class="btn btn-contorno" th:href="@{/perfil/editar}">Editar perfil</a>
+        </div>
+
+        <div class="grid-2" style="margin-top:1.5rem">
+            <div class="tarjeta tarjeta-cuerpo">
+                <h3 class="tarjeta-titulo">Información personal</h3>
+                <dl class="datos">
+                    <div class="fila"><dt>Nombre completo</dt><dd th:text="${usuario.nombre}">David Morales</dd></div>
+                    <div class="fila"><dt>Teléfono</dt><dd th:text="${usuario.telefono != null and !#strings.isEmpty(usuario.telefono)} ? ${usuario.telefono} : 'Sin registrar'">+57 300 123 4567</dd></div>
+                    <div class="fila"><dt>Dirección</dt><dd th:text="${usuario.direccion}">Calle 10</dd></div>
+                    <div class="fila"><dt>Miembro desde</dt><dd th:text="${usuario.fechaRegistro != null} ? ${#temporals.format(usuario.fechaRegistro, 'd MMMM yyyy')} : '—'">15 de mayo de 2026</dd></div>
+                </dl>
+            </div>
+            <div class="tarjeta tarjeta-cuerpo">
+                <h3 class="tarjeta-titulo">Cuenta</h3>
+                <dl class="datos">
+                    <div class="fila"><dt>Tipo de cuenta</dt>
+                        <dd><span class="insignia insignia-verde" th:text="${usuario.rol.name() == 'ADMINISTRADOR'} ? 'Administrador' : 'Jugador'">Jugador</span></dd></div>
+                    <div class="fila"><dt>Notificaciones sin leer</dt>
+                        <dd class="verde" th:text="${@sesion.notificacionesSinLeer}">2</dd></div>
+                    <div class="fila"><dt>Calificaciones dadas</dt>
+                        <dd class="verde" th:text="${totalCalificaciones}">3</dd></div>
+                    <div class="fila"><dt>Correo de acceso</dt>
+                        <dd th:text="${usuario.email}">correo</dd></div>
+                </dl>
+            </div>
+        </div>
+
+        <h3 class="seccion-titulo">Estadísticas de juego</h3>
+        <div class="grid-stats">
+            <div class="stat">
+                <div class="fila"><span class="valor" th:text="${totalReservas}">12</span><th:block th:replace="~{fragmentos/iconos :: icono('archivo-check')}"></th:block></div>
+                <span class="etiqueta">Reservas realizadas</span>
+            </div>
+            <div class="stat">
+                <div class="fila"><span class="valor" th:text="${canchasDiferentes}">8</span><th:block th:replace="~{fragmentos/iconos :: icono('ubicacion')}"></th:block></div>
+                <span class="etiqueta">Canchas diferentes</span>
+            </div>
+            <div class="stat">
+                <div class="fila"><span class="valor" th:text="${horasJugadas} + 'h'">24h</span><th:block th:replace="~{fragmentos/iconos :: icono('reloj')}"></th:block></div>
+                <span class="etiqueta">Horas jugadas</span>
+            </div>
+            <div class="stat">
+                <div class="fila"><span class="valor" th:text="${promedioCalificacion > 0} ? ${#numbers.formatDecimal(promedioCalificacion, 1, 1)} : '—'">4.8</span><th:block th:replace="~{fragmentos/iconos :: icono('estrella')}"></th:block></div>
+                <span class="etiqueta">Calificación promedio</span>
+            </div>
+        </div>
+
+        <h3 class="seccion-titulo">Próximas reservas</h3>
+        <div class="tarjeta">
+            <div th:if="${#lists.isEmpty(proximas)}">
+            <div class="vacio">
+                <div class="icono-vacio"><th:block th:replace="~{fragmentos/iconos :: icono('calendario')}"></th:block></div>
+                <strong>No tienes reservas próximas</strong>
+                <p>Elige una cancha y reserva tu próximo partido.</p>
+                <a class="btn btn-primario" th:href="@{/reservas/add}"><th:block th:replace="~{fragmentos/iconos :: icono('mas')}"></th:block> Nueva reserva</a>
+            </div>
+            </div>
+            <div class="tabla-envoltura" th:unless="${#lists.isEmpty(proximas)}">
+                <table class="tabla">
+                    <thead><tr><th>Cancha</th><th>Fecha</th><th>Horario</th><th>Estado</th><th></th></tr></thead>
+                    <tbody>
+                    <tr th:each="r : ${proximas}">
+                        <td><span class="principal" th:text="${r.espacio.nombre}">Cancha</span>
+                            <span class="secundario" th:text="${r.espacio.tipoDeporte}">futbol 5</span></td>
+                        <td th:text="${#temporals.format(r.fecha, 'EEE d MMM')}">sáb 3 oct</td>
+                        <td th:text="${r.horaInicio} + ' – ' + ${r.horaFin}">19:00 – 20:00</td>
+                        <td><span class="insignia" th:classappend="'estado-' + ${r.estado}" th:text="${r.estado}">CONFIRMADA</span></td>
+                        <td><div class="acciones-fila"><a class="btn btn-neutro btn-sm" th:href="@{/reservas/{id}(id=${r.id})}">Ver</a></div></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<footer th:replace="~{fragmentos/layout :: footer-app}"></footer>
+
+</body>
+</html>

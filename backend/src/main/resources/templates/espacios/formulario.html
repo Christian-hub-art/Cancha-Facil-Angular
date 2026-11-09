@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/layout :: head(${accion})}"></head>
+<body class="app">
+
+<header th:replace="~{fragmentos/layout :: topbar}"></header>
+
+<div class="app-cuerpo">
+    <aside th:replace="~{fragmentos/layout :: sidebar('canchas')}"></aside>
+
+    <main class="app-main">
+        <div class="pagina-cabecera">
+            <div>
+            <div class="migas"><a th:href="@{/espacios}">Canchas</a><span>/</span><span th:text="${accion}">Nueva</span></div>
+                <h1 th:text="${accion}">Crear cancha</h1>
+                <p>Datos que verán los jugadores al buscar y reservar.</p>
+            </div>
+            <div class="acciones"></div>
+        </div>
+
+        <th:block th:replace="~{fragmentos/layout :: alertas}"></th:block>
+        <div class="tarjeta">
+            <form class="tarjeta-cuerpo" th:action="@{/espacios/add}" th:object="${espacio}" method="post" novalidate>
+                <div class="alerta alerta-error" th:if="${#fields.hasGlobalErrors()}">
+                    <th:block th:replace="~{fragmentos/iconos :: icono('alerta')}"></th:block>
+                    <div><div th:each="err : ${#fields.globalErrors()}" th:text="${err}">Error</div></div>
+                </div>
+                <div class="alerta alerta-info" th:if="${#lists.isEmpty(negocios)}">
+                    <th:block th:replace="~{fragmentos/iconos :: icono('alerta')}"></th:block>
+                    <span>Primero registra un negocio: toda cancha pertenece a uno.</span>
+                </div>
+                <input type="hidden" th:field="*{id}">
+                <div class="form-grid">
+                    <div class="campo-form">
+                        <label for="nombre">Nombre de la cancha</label>
+                        <input class="control" type="text" id="nombre" th:field="*{nombre}" th:errorclass="campo-invalido" placeholder="Cancha El Bosque">
+                        <span class="error-campo" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
+                    </div>
+                    <div class="campo-form">
+                        <label for="tipoDeporte">Tipo de cancha</label>
+                        <input class="control" type="text" id="tipoDeporte" th:field="*{tipoDeporte}" th:errorclass="campo-invalido" placeholder="futbol 5" list="tipos">
+                        <span class="error-campo" th:if="${#fields.hasErrors('tipoDeporte')}" th:errors="*{tipoDeporte}"></span>
+                    </div>
+                    <div class="campo-form">
+                        <label for="precioHora">Precio por hora (COP)</label>
+                        <input class="control" type="number" id="precioHora" th:field="*{precioHora}" th:errorclass="campo-invalido" placeholder="80000" step="1000" min="0">
+                        <span class="error-campo" th:if="${#fields.hasErrors('precioHora')}" th:errors="*{precioHora}"></span>
+                    </div>
+                    <div class="campo-form">
+                        <label for="capacidad">Capacidad (jugadores)</label>
+                        <input class="control" type="number" id="capacidad" th:field="*{capacidad}" th:errorclass="campo-invalido" placeholder="10" min="1" max="100">
+                        <span class="error-campo" th:if="${#fields.hasErrors('capacidad')}" th:errors="*{capacidad}"></span>
+                    </div>
+                    <div class="campo-form completo">
+                        <label for="negocioId">Negocio</label>
+                        <select class="control" id="negocioId" name="negocioId">
+                            <option value="">-- Seleccione --</option>
+                            <option th:each="n : ${negocios}" th:value="${n.id}" th:text="${n.nombre}"
+                                    th:selected="${espacio.negocio != null and espacio.negocio.id == n.id}">Opcion</option>
+                        </select>
+                    </div>
+                    <div class="campo-form completo">
+                        <label for="descripcion">Descripción</label>
+                        <textarea class="control" id="descripcion" th:field="*{descripcion}" th:errorclass="campo-invalido" rows="3" placeholder="Grama sintética, techada, con iluminación..."></textarea>
+                        <span class="error-campo" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></span>
+                    </div>
+                    <datalist id="tipos"><option value="futbol 5"><option value="futbol 8"><option value="futbol 11"></datalist>
+                </div>
+                <div class="form-acciones">
+                    <a class="btn btn-neutro" th:href="@{/espacios}">Cancelar</a>
+                    <button class="btn btn-primario" type="submit"><th:block th:replace="~{fragmentos/iconos :: icono('check')}"></th:block> Guardar</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<footer th:replace="~{fragmentos/layout :: footer-app}"></footer>
+
+</body>
+</html>

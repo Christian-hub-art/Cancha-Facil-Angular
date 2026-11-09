@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/layout :: head(${accion})}"></head>
+<body class="app">
+
+<header th:replace="~{fragmentos/layout :: topbar}"></header>
+
+<div class="app-cuerpo">
+    <aside th:replace="~{fragmentos/layout :: sidebar('negocios')}"></aside>
+
+    <main class="app-main">
+        <div class="pagina-cabecera">
+            <div>
+            <div class="migas"><a th:href="@{/negocios}">Negocios</a><span>/</span><span th:text="${accion}">Nuevo</span></div>
+                <h1 th:text="${accion}">Crear negocio</h1>
+                <p>Todo negocio tiene un administrador responsable y un NIT único.</p>
+            </div>
+            <div class="acciones"></div>
+        </div>
+
+        <th:block th:replace="~{fragmentos/layout :: alertas}"></th:block>
+        <div class="tarjeta">
+            <form class="tarjeta-cuerpo" th:action="@{/negocios/add}" th:object="${negocio}" method="post" novalidate>
+                <div class="alerta alerta-error" th:if="${#fields.hasGlobalErrors()}">
+                    <th:block th:replace="~{fragmentos/iconos :: icono('alerta')}"></th:block>
+                    <div><div th:each="err : ${#fields.globalErrors()}" th:text="${err}">Error</div></div>
+                </div>
+                <input type="hidden" th:field="*{id}">
+                <div class="form-grid">
+                    <div class="campo-form">
+                        <label for="nombre">Nombre del negocio</label>
+                        <input class="control" type="text" id="nombre" th:field="*{nombre}" th:errorclass="campo-invalido" placeholder="Complejo Deportivo El Bosque">
+                        <span class="error-campo" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
+                    </div>
+                    <div class="campo-form">
+                        <label for="nit">NIT</label>
+                        <input class="control" type="text" id="nit" th:field="*{nit}" th:errorclass="campo-invalido" placeholder="900123456-1">
+                        <span class="error-campo" th:if="${#fields.hasErrors('nit')}" th:errors="*{nit}"></span>
+                    </div>
+                    <div class="campo-form completo">
+                        <label for="direccion">Dirección</label>
+                        <input class="control" type="text" id="direccion" th:field="*{direccion}" th:errorclass="campo-invalido" placeholder="Calle 134 # 7-20">
+                        <span class="error-campo" th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}"></span>
+                    </div>
+                    <div class="campo-form completo">
+                        <label for="administradorId">Administrador</label>
+                        <select class="control" id="administradorId" name="administradorId">
+                            <option value="">-- Seleccione --</option>
+                            <option th:each="u : ${usuarios}" th:value="${u.id}" th:text="${u.nombre} + ' · ' + ${u.email}"
+                                    th:selected="${negocio.administrador != null and negocio.administrador.id == u.id}">Opcion</option>
+                        </select>
+                    </div>
+                    <div class="campo-form completo">
+                        <label for="descripcion">Descripción</label>
+                        <textarea class="control" id="descripcion" th:field="*{descripcion}" th:errorclass="campo-invalido" rows="3" placeholder="Servicios, horarios, parqueadero..."></textarea>
+                        <span class="error-campo" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></span>
+                    </div>
+                </div>
+                <div class="form-acciones">
+                    <a class="btn btn-neutro" th:href="@{/negocios}">Cancelar</a>
+                    <button class="btn btn-primario" type="submit"><th:block th:replace="~{fragmentos/iconos :: icono('check')}"></th:block> Guardar</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<footer th:replace="~{fragmentos/layout :: footer-app}"></footer>
+
+</body>
+</html>

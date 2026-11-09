@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/layout :: head(${titulo})}"></head>
+<body class="app">
+
+<header th:replace="~{fragmentos/layout :: topbar}"></header>
+
+<div class="app-cuerpo">
+    <aside th:replace="~{fragmentos/layout :: sidebar('notificaciones')}"></aside>
+
+    <main class="app-main">
+        <div class="pagina-cabecera">
+            <div>
+                <h1 th:text="${titulo}">Notificaciones</h1>
+                <p>Avisos sobre reservas, pagos y novedades de la plataforma.</p>
+            </div>
+            <div class="acciones"><a class="btn btn-primario" th:if="${@sesion.admin}" th:href="@{/notificaciones/add}"><th:block th:replace="~{fragmentos/iconos :: icono('mas')}"></th:block> Nueva notificación</a></div>
+        </div>
+
+        <th:block th:replace="~{fragmentos/layout :: alertas}"></th:block>
+
+        <div class="tarjeta">
+            <div th:if="${#lists.isEmpty(notificaciones)}">
+            <div class="vacio">
+                <div class="icono-vacio"><th:block th:replace="~{fragmentos/iconos :: icono('campana')}"></th:block></div>
+                <strong>No hay notificaciones</strong>
+                <p>Aquí verás los avisos de tus reservas y pagos.</p>
+                
+            </div>
+            </div>
+            <div class="tabla-envoltura" th:unless="${#lists.isEmpty(notificaciones)}">
+                <table class="tabla">
+                    <thead><tr><th></th><th>Mensaje</th><th>Para</th><th>Tipo</th><th>Fecha</th><th>Acciones</th></tr></thead>
+                    <tbody>
+                    <tr th:each="n : ${notificaciones}">
+                        <td style="width:28px"><span class="punto" th:classappend="${n.leido} ? 'punto-leido' : 'punto-nuevo'" th:title="${n.leido} ? 'Leída' : 'Sin leer'"></span></td>
+                        <td><span class="texto-corto" style="display:block" th:classappend="${!n.leido} ? 'principal'" th:text="${n.mensaje}">Mensaje</span></td>
+                        <td th:text="${n.usuario != null} ? ${n.usuario.nombre} : '-'">Laura</td>
+                        <td><span class="insignia insignia-gris" th:text="${n.tipo}">RESERVA</span></td>
+                        <td class="id" th:text="${n.fecha != null} ? ${#temporals.format(n.fecha, 'dd MMM, HH:mm')} : '-'">01 oct</td>
+                        <td>
+                            <div class="acciones-fila">
+                                <a class="btn btn-suave btn-sm" th:unless="${n.leido}" th:href="@{/notificaciones/leer/{id}(id=${n.id})}" title="Marcar como leída"><th:block th:replace="~{fragmentos/iconos :: icono('check')}"></th:block></a>
+                                <a class="btn btn-neutro btn-sm" th:href="@{/notificaciones/{id}(id=${n.id})}">Ver</a>
+                                <a class="btn btn-peligro btn-sm" th:href="@{/notificaciones/delete/{id}(id=${n.id})}"
+                                   onclick="return confirm('¿Eliminar esta notificación?')" title="Eliminar"><th:block th:replace="~{fragmentos/iconos :: icono('basura')}"></th:block></a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<footer th:replace="~{fragmentos/layout :: footer-app}"></footer>
+
+</body>
+</html>

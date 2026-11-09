@@ -1,0 +1,33 @@
+:host {
+  display: block;
+  color: #1e293b;
+  font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.login-page {
+  width: min(420px, calc(100% - 2rem));
+  margin: 2rem auto;
+}
+
+.logo {
+  font-weight: 800;
+  color: #1b5e20;
+}
+
+.contenido h1 {
+  margin: 0.5rem 0 0.25rem;
+  color: #0f172a;
+}
+
+.contenido p {
+  margin: 0 0 1rem;
+  color: #64748b;
+}
+
+.aviso {
+  margin-top: 1rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  background: #eef7f0;
+  color: #1b5e20;
+}

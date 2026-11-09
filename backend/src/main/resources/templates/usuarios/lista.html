@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/layout :: head(${titulo})}"></head>
+<body class="app">
+
+<header th:replace="~{fragmentos/layout :: topbar}"></header>
+
+<div class="app-cuerpo">
+    <aside th:replace="~{fragmentos/layout :: sidebar('usuarios')}"></aside>
+
+    <main class="app-main">
+        <div class="pagina-cabecera">
+            <div>
+                <h1 th:text="${titulo}">Usuarios</h1>
+                <p>Jugadores y administradores registrados en la plataforma.</p>
+            </div>
+            <div class="acciones"><a class="btn btn-primario" th:href="@{/usuarios/add}"><th:block th:replace="~{fragmentos/iconos :: icono('mas')}"></th:block> Nuevo usuario</a></div>
+        </div>
+
+        <th:block th:replace="~{fragmentos/layout :: alertas}"></th:block>
+
+        <div class="tarjeta">
+            <div class="herramientas">
+                <form th:action="@{/usuarios}" method="get">
+                    <div class="busqueda">
+                        <th:block th:replace="~{fragmentos/iconos :: icono('buscar')}"></th:block>
+                        <input class="control" type="text" name="nombre" placeholder="Buscar por nombre" th:value="${param.nombre}">
+                    </div>
+                    <button class="btn btn-neutro btn-sm" type="submit">Buscar</button>
+                    <a class="btn btn-texto btn-sm" th:if="${param.nombre != null}" th:href="@{/usuarios}">Limpiar</a>
+                </form>
+            </div>
+
+            <div th:if="${#lists.isEmpty(usuarios)}">
+            <div class="vacio">
+                <div class="icono-vacio"><th:block th:replace="~{fragmentos/iconos :: icono('usuarios')}"></th:block></div>
+                <strong>No hay usuarios para mostrar</strong>
+                <p>Prueba con otro nombre.</p>
+                
+            </div>
+            </div>
+
+            <div class="tabla-envoltura" th:unless="${#lists.isEmpty(usuarios)}">
+                <table class="tabla">
+                    <thead><tr><th>Usuario</th><th>Teléfono</th><th>Rol</th><th>Registro</th><th>Acciones</th></tr></thead>
+                    <tbody>
+                    <tr th:each="u : ${usuarios}">
+                        <td>
+                            <div class="celda-persona">
+                                <span class="avatar" th:text="${#strings.substring(u.nombre, 0, 1)}">L</span>
+                                <div><span class="principal" th:text="${u.nombre}">Laura</span>
+                                    <span class="secundario" th:text="${u.email}">laura@correo.com</span></div>
+                            </div>
+                        </td>
+                        <td th:text="${u.telefono}">300</td>
+                        <td><span class="insignia" th:classappend="${u.rol != null and u.rol.name() == 'ADMINISTRADOR'} ? 'insignia-azul' : 'insignia-verde'" th:text="${u.rol}">CLIENTE</span></td>
+                        <td class="id" th:text="${u.fechaRegistro != null} ? ${#temporals.format(u.fechaRegistro, 'dd MMM yyyy')} : '-'">01 oct 2026</td>
+                        <td>
+                            <div class="acciones-fila">
+                                <a class="btn btn-neutro btn-sm" th:href="@{/usuarios/{id}(id=${u.id})}">Ver</a>
+                                <a class="btn btn-neutro btn-sm" th:href="@{/usuarios/update/{id}(id=${u.id})}" title="Editar"><th:block th:replace="~{fragmentos/iconos :: icono('editar')}"></th:block></a>
+                                <a class="btn btn-peligro btn-sm" th:href="@{/usuarios/delete/{id}(id=${u.id})}"
+                                   onclick="return confirm('¿Eliminar este usuario? Se eliminan también sus reservas y negocios.')" title="Eliminar"><th:block th:replace="~{fragmentos/iconos :: icono('basura')}"></th:block></a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<footer th:replace="~{fragmentos/layout :: footer-app}"></footer>
+
+</body>
+</html>

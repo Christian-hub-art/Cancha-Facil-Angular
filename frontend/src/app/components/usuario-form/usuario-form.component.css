@@ -1,0 +1,46 @@
+/* Colores tomados de usuarios.component.css para mantener el mismo estilo. */
+.usuario-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  align-items: end;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid #f0f2f4;
+}
+
+.campo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.campo-form label {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.control {
+  border: 1px solid #dfe5ec;
+  border-radius: 10px;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.92rem;
+}
+
+.ayuda {
+  margin: 0;
+  color: #b42318;
+  font-size: 0.78rem;
+}
+
+.btn {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.7rem 1.1rem;
+}
+
+.btn-primary {
+  background: #1b5e20;
+  color: #fff;
+}
