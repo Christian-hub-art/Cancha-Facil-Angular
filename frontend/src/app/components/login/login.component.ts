@@ -1,4 +1,7 @@
-import { Component } from '@angular/core'; // Permite definir el componente Angular.
+import { Component, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { AuthService } from '../../services/auth.service';
 import { Credenciales, LoginForm } from '../login-form/login-form.component'; // Componente hijo y estructura de las credenciales.
 
 @Component({
@@ -9,14 +12,29 @@ import { Credenciales, LoginForm } from '../login-form/login-form.component'; //
   templateUrl: './login.component.html',
 })
 export class Login {
-  // Correo recibido desde el hijo; solo se usa para mostrar que llegó la información.
-  correoRecibido = '';
+  private auth = inject(AuthService);
+  private router = inject(Router);
 
-  // $event trae las credenciales que el hijo envió con emit().
-  procesarLogin(credenciales: Credenciales): void {
-    // El inicio de sesión real del proyecto lo procesa Spring Security en POST /login
-    // (ver SeguridadConfig); Angular todavía no tiene un servicio de login que llamar,
-    // por eso aquí solo se recibe la información. La contraseña no se guarda ni se muestra.
-    this.correoRecibido = credenciales.email;
+  mensaje = signal('');
+  enviando = signal(false);
+
+  async procesarLogin(credenciales: Credenciales): Promise<void> {
+    if (this.enviando()) return;
+
+    this.enviando.set(true);
+    this.mensaje.set('');
+
+    try {
+      await this.auth.login(credenciales.email, credenciales.password);
+      await this.router.navigate(['/espacios']);
+    } catch (error) {
+      this.mensaje.set(
+        error instanceof HttpErrorResponse && error.status === 401
+          ? 'Correo o contraseña incorrectos.'
+          : 'No se pudo iniciar sesión. Revisa la conexión con el backend.'
+      );
+    } finally {
+      this.enviando.set(false);
+    }
   }
 }

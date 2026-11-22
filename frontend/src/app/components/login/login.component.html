@@ -7,10 +7,15 @@
 
   <app-login-form
     [titulo]="'Ingreso al sistema'"
+    [enviando]="enviando()"
     (loginEnviado)="procesarLogin($event)"
   ></app-login-form>
 
-  @if (correoRecibido) {
-    <p class="aviso">Credenciales recibidas para: {{ correoRecibido }}</p>
+  @if (enviando()) {
+    <p class="aviso" role="status">Iniciando sesión...</p>
+  }
+
+  @if (mensaje()) {
+    <p class="aviso" role="alert">{{ mensaje() }}</p>
   }
 </section>

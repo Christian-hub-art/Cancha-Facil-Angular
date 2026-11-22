@@ -18,6 +18,7 @@ export interface Credenciales {
 export class LoginForm {
   // PADRE -> HIJO: el padre puede enviar el título que muestra el formulario.
   titulo = input<string>('Iniciar sesión');
+  enviando = input(false);
 
   // HIJO -> PADRE: evento que envía las credenciales al componente padre.
   loginEnviado = output<Credenciales>();
@@ -26,10 +27,12 @@ export class LoginForm {
   password: string = '';
 
   enviarLogin(): void {
+    if (this.enviando()) return;
     // emit(...) envía la información al componente padre.
     this.loginEnviado.emit({
       email: this.email,
       password: this.password,
     });
+    this.password = '';
   }
 }

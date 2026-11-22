@@ -28,6 +28,8 @@
       />
     </div>
 
-    <button class="btn btn-primario" type="submit">Iniciar sesión</button>
+    <button class="btn btn-primario" type="submit" [disabled]="enviando()">
+      {{ enviando() ? 'Ingresando...' : 'Iniciar sesión' }}
+    </button>
   </form>
 </div>

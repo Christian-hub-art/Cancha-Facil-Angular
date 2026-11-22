@@ -35,7 +35,7 @@ public class SesionActual {
             return false;
         }
         return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-                .anyMatch(a -> "ROLE_ADMINISTRADOR".equals(a.getAuthority()));
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
     }
 
     public String getEmail() {
