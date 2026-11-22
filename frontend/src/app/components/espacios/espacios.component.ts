@@ -4,6 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Espacio } from '../../models/espacio.model';
 import { EspacioService } from '../../services/espacio.service';
+import { AuthService } from '../../services/auth.service';
 import { EspacioForm } from '../espacio-form/espacio-form.component'; // Componente hijo.
 import { BotonPagarComponent } from '../../pagos/boton-pagar.component'; // Pago con Wompi.
 
@@ -26,6 +27,9 @@ interface Mensaje {
 export class Espacios implements OnInit {
   // inject(): Angular entrega el servicio que habla con el backend.
   private espacioService = inject(EspacioService);
+  // Rol de la sesion: los botones de administrar canchas solo se muestran a ADMIN.
+  // Es solo interfaz: el backend rechaza igual (403) si un USER envia la peticion a mano.
+  readonly auth = inject(AuthService);
 
   // Cuántos espacios se muestran por página.
   readonly tamanoPagina = 5;
@@ -165,6 +169,10 @@ export class Espacios implements OnInit {
     let texto = textoPorDefecto;
     if (error.status === 0) {
       texto = 'No se pudo conectar con el servidor. Revisa que Spring Boot esté encendido.';
+    } else if (error.status === 401) {
+      texto = 'Tu sesión no está activa. Inicia sesión para continuar.';
+    } else if (error.status === 403) {
+      texto = 'No tienes permiso para esta acción. Solo un administrador puede modificar canchas.';
     } else if (error.status === 404) {
       texto = 'El espacio no existe o ya fue eliminado.';
     } else if (error.status === 400) {

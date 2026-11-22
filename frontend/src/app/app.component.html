@@ -12,9 +12,27 @@
          routerLinkActive pone la clase "activo" en el enlace de la ruta actual. -->
     <nav class="enlaces">
       <a routerLink="/espacios" routerLinkActive="activo">Canchas</a>
-      <a routerLink="/usuarios" routerLinkActive="activo">Usuarios</a>
-      <a routerLink="/login" routerLinkActive="activo">Ingresar</a>
+      <!-- Opciones por rol: Usuarios solo para ADMIN; Ingresar solo para visitantes -->
+      @if (auth.esAdmin()) {
+        <a routerLink="/usuarios" routerLinkActive="activo">Usuarios</a>
+      }
+      @if (auth.sesionConsultada() && !auth.sesion()) {
+        <a routerLink="/login" routerLinkActive="activo">Ingresar</a>
+      }
     </nav>
+
+    <!-- Identidad de la sesion y boton Salir -->
+    @if (auth.sesion(); as sesion) {
+      <div class="acciones sesion-actual">
+        <span class="correo-sesion" [title]="sesion.email">{{ sesion.email }}</span>
+        <span class="insignia" [class.insignia-verde]="auth.esAdmin()" [class.insignia-gris]="!auth.esAdmin()">
+          {{ auth.esAdmin() ? 'ADMIN' : 'USER' }}
+        </span>
+        <button class="btn btn-neutro btn-sm" type="button" (click)="salir()" [disabled]="saliendo()">
+          {{ saliendo() ? 'Saliendo…' : 'Salir' }}
+        </button>
+      </div>
+    }
 
     <!-- Signals: el contador se muestra con interpolación y se reinicia con event binding -->
     <div class="acciones contador-visitas">

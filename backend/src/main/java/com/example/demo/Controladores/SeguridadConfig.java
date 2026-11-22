@@ -36,7 +36,12 @@ public class SeguridadConfig {
                 // Primero se permite consultar canchas; modificarlas exige ADMIN.
                 .requestMatchers("/api/usuarios", "/api/usuarios/**",
                     "/api/espacios", "/api/espacios/**", "/usuarios", "/usuarios/**",
-                    "/espacios/add", "/espacios/update/**", "/espacios/delete/**").hasRole("ADMIN")
+                    "/espacios/add", "/espacios/update/**", "/espacios/delete/**",
+                    // Persona 3: acciones administrativas de las paginas Thymeleaf. Antes
+                    // cualquier USER con sesion podia abrirlas por URL y borrar datos.
+                    "/negocios/delete/**", "/pagos/update/**", "/pagos/estado/**", "/pagos/delete/**",
+                    "/notificaciones/add", "/notificaciones/update/**", "/notificaciones/delete/**",
+                    "/calificaciones/delete/**", "/reservas/delete/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
