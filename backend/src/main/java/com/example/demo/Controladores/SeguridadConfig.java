@@ -1,43 +1,84 @@
 package com.example.demo.Controladores;
 
 import java.util.List;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-/**
- * Configuracion de Spring Security.
- *
- * - La portada (/), /login y /registro son publicos; el resto de paginas Thymeleaf pide sesion.
- * - /usuarios/** (CRUD de usuarios) solo lo ve el rol ADMINISTRADOR.
- * - /api/** queda abierto y sin CSRF para el frontend Angular. Incluye
- *   /api/pagos/webhook, al que Wompi llama sin sesion ni token CSRF.
- * - Swagger UI (/swagger-ui/**) y OpenAPI (/v3/api-docs/**) son publicos para
- *   poder documentar y probar el API REST.
- * - CORS: el API acepta peticiones del frontend configurado en app.frontend-url
- *   (variable FRONTEND_URL), ademas de Angular en local (4200) y en Docker (puerto 80).
- * - Las contrasenas se guardan con BCrypt.
- *
- * El UserDetailsService (UsuarioDetallesService) y el PasswordEncoder de abajo
- * los detecta Spring Boot solo y arma con ellos el proceso de autenticacion.
- */
 @Configuration
-@EnableWebSecurity
 public class SeguridadConfig {
 
-    // URL del frontend Angular; en Render se toma de la variable FRONTEND_URL.
-    @Value("${app.frontend-url:http://localhost:4200}")
-    private String frontendUrl;
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .cors(Customizer.withDefaults())
+            .authorizeHttpRequests(auth -> auth
+                // Recursos que se pueden visitar sin iniciar sesion.
+                .requestMatchers("/", "/login", "/registro", "/error", "/error/**",
+                    "/css/**", "/js/**", "/img/**", "/favicon.ico",
+                    "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**", "/v3/api-docs.yaml",
+                    "/api/auth/csrf").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/espacios", "/api/espacios/**").permitAll()
+                // Primero se permite consultar canchas; modificarlas exige ADMIN.
+                .requestMatchers("/api/usuarios", "/api/usuarios/**",
+                    "/api/espacios", "/api/espacios/**", "/usuarios", "/usuarios/**",
+                    "/espacios/add", "/espacios/update/**", "/espacios/delete/**",
+                    // Persona 3: acciones administrativas de las paginas Thymeleaf. Antes
+                    // cualquier USER con sesion podia abrirlas por URL y borrar datos.
+                    "/negocios/delete/**", "/pagos/update/**", "/pagos/estado/**", "/pagos/delete/**",
+                    "/notificaciones/add", "/notificaciones/update/**", "/notificaciones/delete/**",
+                    "/calificaciones/delete/**", "/reservas/delete/**").hasRole("ADMIN")
+                .anyRequest().authenticated()
+            )
+            .formLogin(form -> form
+                .loginPage("/login")
+                .usernameParameter("email")
+                .passwordParameter("password")
+                // Angular pide JSON; las paginas reciben una redireccion.
+                .successHandler((request, response, auth) -> {
+                    if (pideJson(request)) responderJson(response, 200, "Sesion iniciada");
+                    else response.sendRedirect("/perfil");
+                })
+                .failureHandler((request, response, error) -> {
+                    if (pideJson(request)) responderJson(response, 401, "Credenciales incorrectas");
+                    else response.sendRedirect("/login?error=true");
+                })
+            )
+            .logout(logout -> logout
+                .logoutUrl("/logout")
+                .deleteCookies("JSESSIONID")
+                .logoutSuccessHandler((request, response, auth) -> {
+                    if (pideJson(request)) response.setStatus(204);
+                    else response.sendRedirect("/login?logout=true");
+                })
+            )
+            .exceptionHandling(errors -> errors
+                .authenticationEntryPoint((request, response, error) -> {
+                    if (pideJson(request)) responderJson(response, 401, "Debes iniciar sesion");
+                    else response.sendRedirect("/login");
+                })
+                .accessDeniedHandler((request, response, error) -> {
+                    if (pideJson(request)) responderJson(response, 403, "Acceso denegado");
+                    else response.sendError(403);
+                })
+            );
+        // CSRF permanece activo, como en la guia de clase.
+        return http.build();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -45,58 +86,52 @@ public class SeguridadConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .cors(Customizer.withDefaults())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/login", "/registro", "/error", "/error/**",
-                        "/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
-                .requestMatchers("/api/**").permitAll()
-                // Swagger UI y la definicion OpenAPI (JSON/YAML) de springdoc.
-                // Sin esto, anyRequest().authenticated() redirige al login.
-                .requestMatchers("/swagger-ui.html", "/swagger-ui/**",
-                        "/v3/api-docs", "/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
-                .requestMatchers("/usuarios/**").hasRole("ADMINISTRADOR")
-                .anyRequest().authenticated())
-            .formLogin(form -> form
-                .loginPage("/login")
-                .loginProcessingUrl("/login")
-                .usernameParameter("email")
-                .passwordParameter("password")
-                .defaultSuccessUrl("/perfil")
-                .failureUrl("/login?error=true")
-                .permitAll())
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout=true")
-                .permitAll())
-            // Thymeleaf agrega el token CSRF solo en los formularios con th:action.
-            // El API REST (y el webhook de Wompi) no usan sesion de formulario, por eso se excluye.
-            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"));
+    public InMemoryUserDetailsManager usuariosEnMemoria(PasswordEncoder encoder) {
+        UserDetails laura = User.withUsername("laura@correo.com")
+            .password(encoder.encode("cliente123"))
+            .roles("USER")
+            .build();
 
-        return http.build();
+        UserDetails carlos = User.withUsername("carlos@correo.com")
+            .password(encoder.encode("cliente123"))
+            .roles("USER")
+            .build();
+
+        UserDetails admin = User.withUsername("admin@canchafacil.com")
+            .password(encoder.encode("admin123"))
+            .roles("ADMIN")
+            .build();
+
+        return new InMemoryUserDetailsManager(laura, carlos, admin);
     }
 
-    /**
-     * Origenes que pueden llamar al API desde el navegador. .cors(...) de arriba
-     * usa este bean. Wompi no pasa por aqui: llama al webhook desde su servidor.
-     */
+    // Necesario cuando Angular y Spring se ejecutan en origenes diferentes.
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource(
+            @Value("${app.frontend-url:http://localhost:4200}") String frontendUrl) {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(
-                quitarBarraFinal(frontendUrl),
-                "http://localhost:4200",
-                "http://localhost"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-
+        config.setAllowedOrigins(List.of(frontendUrl.replaceAll("/+$", ""), "http://localhost:4200", "http://localhost"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Content-Type", "Accept", "X-CSRF-TOKEN"));
+        config.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", config);
+        source.registerCorsConfiguration("/login", config);
+        source.registerCorsConfiguration("/logout", config);
         return source;
     }
 
-    private String quitarBarraFinal(String url) {
-        return url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
+    // Las rutas API siempre responden JSON; en login/logout Angular envia Accept.
+    private boolean pideJson(HttpServletRequest request) {
+        String accept = request.getHeader("Accept");
+        return request.getServletPath().startsWith("/api/")
+            || (accept != null && accept.contains("application/json"));
+    }
+
+    private void responderJson(HttpServletResponse response, int status, String mensaje)
+            throws java.io.IOException {
+        response.setStatus(status);
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write("{\"mensaje\":\"" + mensaje + "\"}");
     }
 }

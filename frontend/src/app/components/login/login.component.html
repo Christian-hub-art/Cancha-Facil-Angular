@@ -5,12 +5,21 @@
     <p>Bienvenido de nuevo. Accede a tu cuenta.</p>
   </div>
 
+  @if (aviso && !mensajeError()) {
+    <p class="aviso" role="status">{{ aviso }}</p>
+  }
+
   <app-login-form
     [titulo]="'Ingreso al sistema'"
+    [enviando]="enviando()"
     (loginEnviado)="procesarLogin($event)"
   ></app-login-form>
 
-  @if (correoRecibido) {
-    <p class="aviso">Credenciales recibidas para: {{ correoRecibido }}</p>
+  @if (enviando()) {
+    <p class="aviso" role="status">Iniciando sesión...</p>
+  }
+
+  @if (mensajeError()) {
+    <p class="aviso aviso-error" role="alert">{{ mensajeError() }}</p>
   }
 </section>

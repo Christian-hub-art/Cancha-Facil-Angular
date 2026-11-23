@@ -29,21 +29,7 @@ import com.example.demo.Repositorios.PagoRepository;
 import com.example.demo.Repositorios.ReservaRepository;
 import com.example.demo.Repositorios.UsuarioRepository;
 
-/**
- * Datos iniciales para demostrar la aplicacion.
- *
- * Se ejecuta una vez al arrancar (CommandLineRunner):
- * 1. Si hay usuarios con contrasena en texto plano (creados antes de agregar el
- *    login), se cifran con BCrypt para que puedan iniciar sesion con la misma clave.
- * 2. Se asegura que exista el administrador admin@canchafacil.com / admin123.
- * 3. Si la base esta vacia, carga negocios, espacios, reservas, pagos,
- *    calificaciones y notificaciones de ejemplo.
- *
- * Usuarios de prueba:
- *   admin@canchafacil.com / admin123   (ADMINISTRADOR)
- *   laura@correo.com      / cliente123 (CLIENTE)
- *   carlos@correo.com     / cliente123 (CLIENTE)
- */
+/** Datos de negocio de demostracion; las cuentas se autentican en memoria. */
 @Component
 public class DatosIniciales implements CommandLineRunner {
 
@@ -87,8 +73,11 @@ public class DatosIniciales implements CommandLineRunner {
         if (admin == null) {
             admin = usuarioRepository.save(usuario("Administrador CanchaFacil", "admin@canchafacil.com",
                     "admin123", "3001112233", "Calle 10 # 20-30", Rol.ADMINISTRADOR));
-            log.info("Usuario administrador creado: admin@canchafacil.com / admin123");
+            log.info("Usuario administrador de demostracion creado");
         }
+
+        asegurarCliente("Laura Gomez", "laura@correo.com", "3104445566", "Carrera 45 # 12-08");
+        asegurarCliente("Carlos Ruiz", "carlos@correo.com", "3207778899", "Avenida 68 # 30-15");
 
         if (baseVacia) {
             cargarDatosDeEjemplo(admin);
@@ -99,13 +88,17 @@ public class DatosIniciales implements CommandLineRunner {
         completarEspaciosParaPaginacion(admin);
     }
 
+    private void asegurarCliente(String nombre, String email, String telefono, String direccion) {
+        if (!usuarioRepository.existsByEmailIgnoreCase(email)) {
+            usuarioRepository.save(usuario(nombre, email, "cliente123", telefono, direccion, Rol.CLIENTE));
+        }
+    }
+
     /** Datos de ejemplo completos; solo se cargan la primera vez (base vacia). */
     private void cargarDatosDeEjemplo(Usuario admin) {
         // ---------- Usuarios ----------
-        Usuario laura = usuarioRepository.save(usuario("Laura Gomez", "laura@correo.com",
-                "cliente123", "3104445566", "Carrera 45 # 12-08", Rol.CLIENTE));
-        Usuario carlos = usuarioRepository.save(usuario("Carlos Ruiz", "carlos@correo.com",
-                "cliente123", "3207778899", "Avenida 68 # 30-15", Rol.CLIENTE));
+        Usuario laura = usuarioRepository.findByEmailIgnoreCase("laura@correo.com");
+        Usuario carlos = usuarioRepository.findByEmailIgnoreCase("carlos@correo.com");
 
         // ---------- Negocios ----------
         Negocio bosque = negocioRepository.save(negocio(admin, "Complejo Deportivo El Bosque",

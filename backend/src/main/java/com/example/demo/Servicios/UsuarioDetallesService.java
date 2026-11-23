@@ -4,18 +4,16 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.Entidades.Usuario;
 import com.example.demo.Repositorios.UsuarioRepository;
 
 /**
- * Le dice a Spring Security como buscar un usuario al hacer login.
- * El "username" es el email; el rol del enum se convierte en ROLE_CLIENTE o
- * ROLE_ADMINISTRADOR para poder usar hasRole(...).
+ * Alternativa de autenticacion con BD, sin registrar como bean.
+ * Esta entrega usa exclusivamente usuariosEnMemoria de SeguridadConfig.
+ * Traduce CLIENTE a USER y ADMINISTRADOR a ADMIN.
  */
-@Service
 public class UsuarioDetallesService implements UserDetailsService {
 
     private final UsuarioRepository usuarioRepository;
@@ -33,7 +31,7 @@ public class UsuarioDetallesService implements UserDetailsService {
         }
         return User.withUsername(usuario.getEmail())
                 .password(usuario.getPassword())
-                .roles(usuario.getRol().name())
+                .roles(usuario.getRol() == com.example.demo.Entidades.Rol.ADMINISTRADOR ? "ADMIN" : "USER")
                 .build();
     }
 }

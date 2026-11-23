@@ -186,6 +186,10 @@ cargarUsuarios(): void {
     
     if(error.status === 0){
       this.mensajeError.set('No se pudo conectar con el servidor')
+    } else if (error.status === 401) {
+      this.mensajeError.set('Tu sesión no está activa. Inicia sesión para continuar.')
+    } else if (error.status === 403) {
+      this.mensajeError.set('No tienes permiso para administrar usuarios. Esta sección es solo para administradores.')
     } else if (error.status === 400) {
       this.mensajeError.set('Se ingresaron datos invalidos ')
     } else if (error.status === 409){
