@@ -1,7 +1,7 @@
 <div class="auth-tarjeta">
   <h2>{{ titulo() }}</h2>
 
-  <form (ngSubmit)="enviarLogin()">
+  <form #formulario="ngForm" (ngSubmit)="enviarLogin()">
     <div class="campo-form">
       <label for="email">Correo electrónico</label>
       <input
@@ -12,6 +12,7 @@
         name="email"
         placeholder="tu@correo.com"
         autocomplete="username"
+        required
       />
     </div>
 
@@ -25,10 +26,11 @@
         name="password"
         placeholder="••••••••••••"
         autocomplete="current-password"
+        required
       />
     </div>
 
-    <button class="btn btn-primario" type="submit" [disabled]="enviando()">
+    <button class="btn btn-primario" type="submit" [disabled]="enviando() || formulario.invalid">
       {{ enviando() ? 'Ingresando...' : 'Iniciar sesión' }}
     </button>
   </form>

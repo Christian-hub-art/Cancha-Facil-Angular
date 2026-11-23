@@ -1,5 +1,11 @@
 # FrontendAngular
 
+> **Carpeta activa del frontend de CanchaFácil.** El inicio de sesión, la
+> consulta de sesión, el logout y los guards de rutas están documentados en
+> [`SESION.md`](./SESION.md). Contrato del backend: `backend/SEGURIDAD.md`.
+> Arranque local: backend en `http://localhost:8080` y `npm start` aquí
+> (`http://localhost:4200`).
+
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.8.
 
 ## Development server

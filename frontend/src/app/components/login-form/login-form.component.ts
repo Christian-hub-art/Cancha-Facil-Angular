@@ -33,6 +33,7 @@ export class LoginForm {
       email: this.email,
       password: this.password,
     });
+    // La contraseña no se conserva en el formulario después de enviarla.
     this.password = '';
   }
 }

@@ -5,6 +5,10 @@
     <p>Bienvenido de nuevo. Accede a tu cuenta.</p>
   </div>
 
+  @if (aviso && !mensajeError()) {
+    <p class="aviso" role="status">{{ aviso }}</p>
+  }
+
   <app-login-form
     [titulo]="'Ingreso al sistema'"
     [enviando]="enviando()"
@@ -15,7 +19,7 @@
     <p class="aviso" role="status">Iniciando sesión...</p>
   }
 
-  @if (mensaje()) {
-    <p class="aviso" role="alert">{{ mensaje() }}</p>
+  @if (mensajeError()) {
+    <p class="aviso aviso-error" role="alert">{{ mensajeError() }}</p>
   }
 </section>
